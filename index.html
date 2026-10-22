@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transparencia Tributaria</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Mapa interactivo del Derecho de Registro e Inspección (DReI) en Rosario y su área metropolitana. Fundación Apertura.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Carlito:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+</style>
+<style>
+/* Layout: banda institucional navy con filete dorado; debajo, tablero de dos columnas (mapa | ficha) y, abajo, ranking/tabla. */
+:root{
+  --bg:#FBFAF6; --panel:#FFFFFF; --ink:#1B2433; --muted:#5D6574; --line:#E4DED2; --soft:#F5F0E8;
+  --navy:#1A2D4F; --gold:#C8A84B; --gold-ink:#8A6D1E; --on-band:#FFFFFF; --on-band-muted:#C9D2E0;
+  --c1:#E8EEF5; --c2:#BCCDE0; --c3:#83A0C2; --c4:#4C6D98; --c5:#1A2D4F; --nodata:#D9D4C9; --nodata-ink:#8B8577;
+  --up:#A23B2A; --down:#2F6B4F; --map-bg:#EEF1F4; --sel:#C8A84B;
+  --f-display:Cambria,"Caladea",Georgia,"Times New Roman",serif;
+  --f-body:Calibri,"Carlito","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1524; --panel:#131E33; --ink:#E7ECF3; --muted:#9BA7B9; --line:#24324C; --soft:#18253F;
+  --navy:#0A1322; --gold:#D6B861; --gold-ink:#E2C77A; --on-band:#FFFFFF; --on-band-muted:#AEB9CB;
+  --c1:#22324D; --c2:#2E4A73; --c3:#4970A6; --c4:#7EA4D0; --c5:#C8DBF0; --nodata:#353C49; --nodata-ink:#8D96A5;
+  --up:#E07A64; --down:#6FC197; --map-bg:#111B2E; --sel:#E2C77A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1524; --panel:#131E33; --ink:#E7ECF3; --muted:#9BA7B9; --line:#24324C; --soft:#18253F;
+  --navy:#0A1322; --gold:#D6B861; --gold-ink:#E2C77A; --on-band:#FFFFFF; --on-band-muted:#AEB9CB;
+  --c1:#22324D; --c2:#2E4A73; --c3:#4970A6; --c4:#7EA4D0; --c5:#C8DBF0; --nodata:#353C49; --nodata-ink:#8D96A5;
+  --up:#E07A64; --down:#6FC197; --map-bg:#111B2E; --sel:#E2C77A; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Banda */
+/* Encabezado con la paleta del logo: crema #F8F6EE, azul pizarra #293545 y grises del globo */
+.band{--b-bg:#F8F6EE;--b-ink:#293545;--b-muted:#5E6774;--b-line:#CBCBCB;--b-card:#FFFFFF;--b-globe:#9DA1A3;
+  background:var(--b-bg);color:var(--b-ink);border-bottom:4px solid var(--b-ink);color-scheme:light}
+.band .wrap{padding-block:26px 24px;display:grid;gap:20px}
+.band .top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.band .logo{width:112px;height:auto;display:block}
+.band .heads{display:grid;gap:8px;min-width:0;padding-left:24px;border-left:1px solid var(--b-line)}
+.brand{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--b-muted);font-weight:700}
+.band h1{font-size:clamp(30px,4.4vw,46px);line-height:1.05;letter-spacing:.01em;color:var(--b-ink)}
+.band p.lede{margin:0;max-width:68ch;color:var(--b-muted);font-size:17px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--b-card);border:1px solid var(--b-line);border-top:3px solid var(--b-ink);border-radius:4px;padding:12px 14px;min-width:0}
+.kpi .v{font-family:var(--f-display);font-size:26px;font-weight:700;color:var(--b-ink);line-height:1.1}
+.kpi .l{font-size:13px;color:var(--b-muted);margin-top:2px}
+@media (max-width:640px){.band .top{grid-template-columns:minmax(0,1fr);gap:14px}.band .logo{width:84px}.band .heads{padding-left:0;border-left:0;border-top:1px solid var(--b-line);padding-top:12px}}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Controles */
+.controls{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:end;padding-block:18px 14px}
+.field{display:grid;gap:4px;min-width:0}
+.field label,.lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.field select,.field input{height:40px;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:0 10px;min-width:0}
+.field select#f-act{min-width:220px;font-weight:700}
+.field input#f-ventas{width:170px}
+.field input#f-buscar{width:200px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;height:40px;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:0 14px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--c3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:var(--c3)}}
+.actdesc{font-size:14px;color:var(--muted);flex-basis:100%;margin-top:-4px}
+
+/* Tablero */
+.board{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:920px){.board{grid-template-columns:minmax(0,1fr)}}
+.mapbox{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--map-bg)}
+#map{height:600px;background:var(--map-bg)}
+@media (max-width:920px){#map{height:440px}}
+@media (max-width:560px){.legend{font-size:12px;padding:6px 8px}.legend .hint{display:none}}
+.legend{position:absolute;left:10px;bottom:10px;z-index:500;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-width:calc(100% - 20px)}
+.legend .t{font-weight:700;margin-bottom:4px}
+.legend .row{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.08)}
+.legend .hint{color:var(--muted);font-size:12px;margin-top:4px}
+.mapnote{position:absolute;right:10px;bottom:28px;top:auto;left:auto;max-width:min(320px,calc(100% - 20px));z-index:500;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--muted)}
+.leaflet-container{font-family:var(--f-body);background:var(--map-bg)}
+.leaflet-tooltip{font-family:var(--f-body);font-size:13px;border-radius:4px;border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.leaflet-tooltip-top:before{border-top-color:var(--panel)}
+.leaflet-control-zoom a{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--panel) 85%,transparent)!important;color:var(--muted)!important}
+.leaflet-control-attribution a{color:var(--muted)!important}
+.basectl{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px;display:flex;align-items:center;gap:6px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.basectl label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.basectl select{border:0;background:transparent;font-weight:700;cursor:pointer}
+.tiles-soft{filter:grayscale(.7) contrast(.85) brightness(1.06);opacity:.75}
+.provbtn{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);color:var(--ink)}
+.ring-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);font-weight:700;white-space:nowrap}
+
+/* Ficha */
+.ficha{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 18px 16px;min-width:0}
+.ficha .eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ficha h2{font-size:28px;line-height:1.1;margin-top:4px}
+.big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px;padding:12px 14px;background:var(--soft);border-radius:6px}
+.big .v{font-family:var(--f-display);font-size:40px;font-weight:700;line-height:1;color:var(--ink)}
+.big .u{font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--panel)}
+.chip.up{color:var(--up);border-color:color-mix(in srgb,var(--up) 40%,transparent)}
+.chip.down{color:var(--down);border-color:color-mix(in srgb,var(--down) 40%,transparent)}
+.chip.ref{color:var(--gold-ink);border-color:color-mix(in srgb,var(--gold) 50%,transparent)}
+.note{font-size:14px;margin-top:10px;padding-left:10px;border-left:3px solid var(--gold);color:var(--ink)}
+.acts{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+.acts td{padding:4px 0;border-bottom:1px solid var(--line)}
+.acts td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.acts tr.on td{color:var(--gold-ink)}
+.acts tr{cursor:pointer}
+.acts tr:hover td{background:var(--soft)}
+.dl{display:grid;gap:10px;margin-top:14px}
+.dl h3{font-family:var(--f-body);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dl p{margin:2px 0 0;font-size:14px}
+.dl a{color:var(--gold-ink)}
+.empty{color:var(--muted);font-size:15px}
+.nodata-badge{display:inline-block;margin-top:12px;font-size:13px;padding:3px 10px;border-radius:999px;background:var(--nodata);color:var(--ink)}
+
+/* Pestañas inferiores */
+.lower{margin-top:26px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);align-items:end;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;font-weight:700}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs .sp{flex:1}
+.tabs .tool{font-weight:400;font-size:14px;color:var(--gold-ink);padding:8px 10px}
+.panel{padding-top:16px}
+.rank{display:grid;gap:4px}
+.rrow{display:grid;grid-template-columns:28px minmax(110px,220px) minmax(0,1fr) 92px;gap:10px;align-items:center;padding:5px 6px;border-radius:4px;cursor:pointer}
+.rrow:hover{background:var(--soft)}
+.rrow.sel{background:var(--soft);box-shadow:inset 3px 0 0 var(--gold)}
+.rrow .p{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.rrow .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow .n.ref{font-weight:700}
+.rrow .bar{height:14px;border-radius:2px;min-width:2px}
+.rrow .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+@media (max-width:560px){.rrow{grid-template-columns:24px minmax(0,1fr) 80px}.rrow .track{grid-column:2/4}}
+.rankfoot{font-size:14px;color:var(--muted);margin-top:12px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table.mx{border-collapse:collapse;font-size:14px;min-width:100%}
+table.mx th,table.mx td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.mx th{position:sticky;top:0;background:var(--panel);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none}
+table.mx th:first-child,table.mx td:first-child{text-align:left;position:sticky;left:0;background:var(--panel);z-index:1}
+table.mx th.on{color:var(--gold-ink)}
+table.mx td.cell{font-variant-numeric:tabular-nums}
+table.mx tr{cursor:pointer}
+table.mx tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--gold);font-weight:700}
+table.mx sup{color:var(--gold-ink)}
+
+/* Pie */
+.foot{margin-top:30px;border-top:1px solid var(--line);padding-block:18px 36px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;font-size:14px;color:var(--muted)}
+.foot p{margin:0 0 8px;max-width:75ch}
+.foot a{color:var(--gold-ink)}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.status.live i{background:var(--down)}
+@media (max-width:760px){.foot{grid-template-columns:minmax(0,1fr)}}
+/* Participá y formularios */
+.part{margin-top:34px;padding-block:24px;border-top:1px solid var(--line)}
+.part-head{max-width:72ch;display:grid;gap:6px}
+.part-head h2{font-size:26px}
+.part-head p{margin:0;color:var(--muted)}
+.part-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:760px){.part-grid{grid-template-columns:minmax(0,1fr)}}
+.pcard{background:var(--panel);border:1px solid var(--line);border-top:3px solid #293545;border-radius:6px;padding:16px 18px;display:grid;gap:8px;align-content:start}
+.pcard h3{font-size:19px}
+.pcard p{margin:0;font-size:15px;color:var(--muted)}
+.pcard .btn{justify-self:start;margin-top:4px}
+.btn{height:40px;padding:0 16px;border-radius:6px;border:1px solid #293545;background:#293545;color:#fff;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.15)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn[disabled]{opacity:.6;cursor:progress}
+.linkbtn{background:none;border:0;padding:0;color:var(--gold-ink);text-decoration:underline;cursor:pointer;font:inherit}
+.rev-badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;padding:3px 10px;border-radius:999px;border:1px dashed var(--gold);color:var(--gold-ink)}
+.rrow .rev{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);margin-left:6px}
+.dlg{border:0;padding:0;border-radius:10px;width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dlg::backdrop{background:rgba(20,28,40,.55)}
+.dlg-in{display:grid;max-height:calc(100dvh - 24px)}
+.dlg-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-top h2{font-size:22px}
+.dlg .x{border:0;background:none;font-size:28px;line-height:1;cursor:pointer;color:var(--muted);width:40px;height:40px}
+.tf,.done{padding:16px 20px 20px;overflow:auto;display:grid;gap:14px}
+.tf .intro{margin:0;color:var(--muted);font-size:15px}
+.tf fieldset{border:1px solid var(--line);border-radius:8px;padding:12px 14px 14px;margin:0;display:grid;gap:12px;min-width:0}
+.tf legend{font-family:var(--f-display);font-weight:700;padding:0 6px;font-size:16px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.g3 .span2{grid-column:span 3}
+@media (max-width:600px){.g2,.g3{grid-template-columns:minmax(0,1fr)}.g3 .span2{grid-column:auto}}
+.fld{display:grid;gap:4px;min-width:0}
+.fld label,.flbl{font-size:13px;font-weight:700;color:var(--ink)}
+.fld input,.fld select,.fld textarea{width:100%;min-height:40px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:8px 10px;color:var(--ink)}
+.fld textarea{resize:vertical}
+.fld input[aria-invalid="true"],.fld select[aria-invalid="true"],.fld textarea[aria-invalid="true"]{border-color:var(--up);outline:1px solid var(--up)}
+.radios{display:flex;flex-wrap:wrap;gap:8px 16px}
+.radios label{font-weight:400;display:inline-flex;gap:6px;align-items:center}
+.seg.sm{height:40px;justify-self:start;width:max-content}
+.seg.sm button{padding:0 12px;font-size:14px}
+.acts-in summary{cursor:pointer;font-weight:700;font-size:14px}
+.acts-in summary span{font-weight:400;color:var(--muted)}
+.acts-in .g3{margin-top:10px}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+.hint.warn{color:var(--gold-ink)}
+.ok{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.ok input{margin-top:3px}
+.ferr{margin:0;padding:8px 12px;border-radius:6px;background:color-mix(in srgb,var(--up) 12%,transparent);color:var(--up);font-size:14px}
+.fbtns{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.done{text-align:center;justify-items:center;padding-block:28px}
+.done-ic{width:56px;height:56px;border-radius:50%;background:#293545;color:#fff;display:grid;place-items:center;font-size:28px}
+.done p{margin:0;max-width:52ch}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<header class="band" id="tt-band">
+  <div class="wrap">
+    <div class="top">
+      <img class="logo" alt="Fundación Apertura" width="240" height="234" src="data:image/png;base64,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">
+      <div class="heads">
+        <div class="brand">Departamento de Investigación</div>
+        <h1 id="tt-title">Transparencia Tributaria</h1>
+        <p class="lede" id="tt-lede"></p>
+      </div>
+    </div>
+    <div class="kpis" id="tt-kpis"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="controls" role="group" aria-label="Filtros">
+    <div class="field"><label for="f-act">Actividad</label><select id="f-act"></select></div>
+    <div class="field"><span class="lbl" id="lbl-modo">Alícuota</span>
+      <div class="seg" role="group" aria-labelledby="lbl-modo">
+        <button type="button" id="m-ef" aria-pressed="true">Efectiva</button>
+        <button type="button" id="m-no" aria-pressed="false">Nominal</button>
+      </div></div>
+    <div class="field" id="w-prov" hidden><label for="f-prov">Provincia</label><select id="f-prov"></select></div>
+    <div class="field" id="w-reg" hidden><label for="f-reg">Región</label><select id="f-reg"></select></div>
+    <div class="field"><label for="f-buscar">Buscar localidad</label><input id="f-buscar" type="search" list="dl-loc" placeholder="Ej.: Funes" autocomplete="off"><datalist id="dl-loc"></datalist></div>
+    <div class="field"><label for="f-ventas">Ventas mensuales ($)</label><input id="f-ventas" inputmode="numeric" placeholder="Ej.: 40.000.000" autocomplete="off"></div>
+    <div class="actdesc" id="act-desc"></div>
+  </div>
+
+  <section class="board">
+    <div class="mapbox">
+      <div id="map" role="region" aria-label="Mapa de alícuotas por localidad"></div>
+      <div class="legend" id="legend"></div>
+      <div class="mapnote" id="mapnote" hidden></div>
+    </div>
+    <aside class="ficha" id="ficha" aria-live="polite"></aside>
+  </section>
+
+  <section class="lower">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="t-rank" aria-selected="true" aria-controls="p-rank">Ranking</button>
+      <button type="button" role="tab" id="t-tabla" aria-selected="false" aria-controls="p-tabla">Todas las actividades</button>
+      <span class="sp"></span>
+      <button type="button" class="tool" id="b-csv" hidden>Descargar datos (CSV)</button>
+    </div>
+    <div class="panel" id="p-rank" role="tabpanel" aria-labelledby="t-rank"><div class="rank" id="rank"></div><p class="rankfoot" id="rankfoot"></p></div>
+    <div class="panel" id="p-tabla" role="tabpanel" aria-labelledby="t-tabla" hidden><div class="tablewrap"><table class="mx" id="mx"></table></div><p class="rankfoot">Alícuotas en ‰. Clic en un encabezado para ordenar. <sup>*</sup> tiene una aclaración en la ficha.</p></div>
+  </section>
+
+  <section class="part" id="participa" aria-labelledby="part-t">
+    <div class="part-head">
+      <div class="lbl">Participá</div>
+      <h2 id="part-t">Ayudanos a completar y corregir el mapa</h2>
+      <p>Los datos salen de las ordenanzas vigentes. Si encontrás un error, tenés una sugerencia o conocés la ordenanza de una localidad que no está, contanos. Revisamos cada aporte antes de darlo por verificado.</p>
+    </div>
+    <div class="part-grid">
+      <article class="pcard">
+        <h3>Reportá un error o dejá una sugerencia</h3>
+        <p>Una alícuota que cambió, un mínimo mal cargado, una actividad que falta o una idea para mejorar el mapa.</p>
+        <button type="button" class="btn" data-open="coment">Escribir un comentario</button>
+      </article>
+      <article class="pcard">
+        <h3>Sumá una localidad</h3>
+        <p>Cargá la alícuota y el enlace a la ordenanza de un municipio o comuna, de cualquier provincia. Aparece en el mapa enseguida, marcada «en revisión».</p>
+        <button type="button" class="btn" data-open="loc">Cargar una localidad</button>
+      </article>
+    </div>
+  </section>
+
+  <dialog class="dlg" id="dlg" aria-labelledby="dlg-t">
+    <div class="dlg-in">
+      <div class="dlg-top"><h2 id="dlg-t">Comentario</h2><button type="button" class="x" id="dlg-x" aria-label="Cerrar">×</button></div>
+
+      <form id="f-coment" class="tf" novalidate hidden>
+        <p class="intro">Tu comentario llega a la Fundación Apertura. No publicamos tus datos de contacto.</p>
+        <fieldset><legend>Tus datos</legend>
+          <div class="g2">
+            <div class="fld"><label for="c-nombre">Nombre y apellido *</label><input id="c-nombre" name="nombre" required autocomplete="name"></div>
+            <div class="fld"><label for="c-email">Correo electrónico *</label><input id="c-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="fld"><label for="c-rol">¿Desde dónde participás?</label><select id="c-rol" name="rol" data-roles></select></div>
+            <div class="fld"><label for="c-org">Organización o empresa</label><input id="c-org" name="organizacion" autocomplete="organization"></div>
+          </div>
+        </fieldset>
+        <fieldset><legend>Tu comentario</legend>
+          <div class="g2">
+            <div class="fld"><label for="c-loc">Localidad *</label><select id="c-loc" name="localidad_id" required></select></div>
+            <div class="fld"><label for="c-act">Actividad</label><select id="c-act" name="actividad"></select></div>
+            <div class="fld" id="c-otra-w" hidden><label for="c-otra">¿Qué localidad?</label><input id="c-otra" name="localidad_otra"></div>
+            <div class="fld" id="c-prov-w" hidden><label for="c-prov">Provincia</label><select id="c-prov" name="provincia" data-provs></select></div>
+          </div>
+          <div class="fld"><span class="flbl">Tipo de comentario *</span>
+            <div class="radios" role="radiogroup">
+              <label><input type="radio" name="categoria" value="Error en un dato" checked> Error en un dato</label>
+              <label><input type="radio" name="categoria" value="Dato desactualizado"> Dato desactualizado</label>
+              <label><input type="radio" name="categoria" value="Sugerencia"> Sugerencia</label>
+              <label><input type="radio" name="categoria" value="Otro"> Otro</label>
+            </div></div>
+          <div class="fld"><label for="c-txt">Comentario *</label><textarea id="c-txt" name="comentario" rows="4" required placeholder="Ej.: desde octubre la alícuota para gastronomía es 12‰ (Ordenanza 1234/26, art. 5)."></textarea></div>
+          <div class="fld"><label for="c-url">Enlace que lo respalde</label><input id="c-url" name="enlace" type="url" placeholder="https://"></div>
+        </fieldset>
+        <div class="hp" aria-hidden="true"><label for="c-web">Dejar en blanco</label><input id="c-web" name="web_site" tabindex="-1" autocomplete="off"></div>
+        <label class="ok"><input type="checkbox" name="acepto" required> Acepto que la Fundación Apertura use estos datos para revisar el aporte y, si hace falta, contactarme.</label>
+        <p class="ferr" role="alert" hidden></p>
+        <div class="fbtns"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn">Enviar comentario</button></div>
+      </form>
+
+      <form id="f-loc" class="tf" novalidate hidden>
+        <p class="intro">Con estos datos la localidad se suma al mapa marcada «en revisión». La Fundación la verifica contra la ordenanza antes de darla por relevada.</p>
+        <fieldset><legend>1. Tus datos</legend>
+          <div class="g2">
+            <div class="fld"><label for="l-nombre">Nombre y apellido *</label><input id="l-nombre" name="nombre" required autocomplete="name"></div>
+            <div class="fld"><label for="l-email">Correo electrónico *</label><input id="l-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="fld"><label for="l-rol">¿Desde dónde participás? *</label><select id="l-rol" name="rol" required data-roles></select></div>
+            <div class="fld"><label for="l-org">Organización o empresa</label><input id="l-org" name="organizacion" autocomplete="organization"></div>
+          </div>
+        </fieldset>
+        <fieldset><legend>2. Localidad</legend>
+          <div class="g2">
+            <div class="fld"><label for="l-prov">Provincia *</label><select id="l-prov" name="provincia" required data-provs></select></div>
+            <div class="fld"><label for="l-loc">Municipio o comuna *</label><input id="l-loc" name="localidad" required list="l-loc-dl" autocomplete="off" placeholder="Escribí el nombre"><datalist id="l-loc-dl"></datalist></div>
+            <div class="fld"><label for="l-tipo">Tipo de gobierno local</label><select id="l-tipo" name="tipo_gobierno"><option>Municipio</option><option>Comuna</option></select></div>
+          </div>
+          <p class="hint" id="l-aviso" hidden></p>
+        </fieldset>
+        <fieldset><legend>3. Normativa</legend>
+          <div class="g3">
+            <div class="fld"><label for="l-ord">N° de ordenanza tributaria *</label><input id="l-ord" name="ordenanza" required placeholder="Ej.: 35/2025"></div>
+            <div class="fld"><label for="l-per">Ejercicio fiscal *</label><select id="l-per" name="periodo" required data-periodos></select></div>
+            <div class="fld span2"><label for="l-url">Enlace a la ordenanza *</label><input id="l-url" name="enlace" type="url" required placeholder="https://"></div>
+          </div>
+          <p class="hint">Si la ordenanza no está publicada en línea, subila a Google Drive o a otro servicio y pegá el enlace de acceso público.</p>
+        </fieldset>
+        <fieldset><legend>4. Derecho de Registro e Inspección (DReI / TISH)</legend>
+          <div class="g3">
+            <div class="fld"><span class="flbl">Las alícuotas están en</span>
+              <div class="seg sm" role="group" aria-label="Unidad de las alícuotas"><button type="button" data-u="mil" aria-pressed="true">‰ por mil</button><button type="button" data-u="pct" aria-pressed="false">% por ciento</button></div></div>
+            <div class="fld"><label for="l-gen">Alícuota general *</label><input id="l-gen" name="al_general" required inputmode="decimal" placeholder="Ej.: 6,5"></div>
+            <div class="fld"><label for="l-adic">Adicionales obligatorios sobre la tasa (%)</label><input id="l-adic" name="adicional_oblig" inputmode="decimal" placeholder="Ej.: 10"></div>
+          </div>
+          <div class="fld"><label for="l-adicd">Detalle de los adicionales</label><input id="l-adicd" name="adicional_detalle" placeholder="Ej.: Fondo de obras 5% y fondo de seguridad 5%"></div>
+          <details class="acts-in"><summary>Alícuotas distintas por actividad <span>(completá solo las que difieren de la general)</span></summary><div class="g3" id="l-acts"></div></details>
+        </fieldset>
+        <fieldset><legend>5. Mínimos y otros datos</legend>
+          <div class="fld"><label for="l-uv">¿Usa módulos o unidades tributarias? Nombre y valor</label><input id="l-uv" name="unidad_valor" placeholder="Ej.: Módulo Tributario: $526 (octubre 2026)"></div>
+          <div class="fld"><label for="l-min">Mínimos mensuales</label><textarea id="l-min" name="minimos" rows="2" placeholder="Ej.: sin personal $9.000; hasta 5 empleados $36.000; más de 20 $223.000"></textarea></div>
+          <div class="fld"><label for="l-reg">Regímenes especiales, cuotas fijas o promociones</label><textarea id="l-reg" name="regimenes_especiales" rows="2"></textarea></div>
+          <div class="fld"><label for="l-com">Comentarios</label><textarea id="l-com" name="comentario" rows="2"></textarea></div>
+        </fieldset>
+        <div class="hp" aria-hidden="true"><label for="l-web">Dejar en blanco</label><input id="l-web" name="web_site" tabindex="-1" autocomplete="off"></div>
+        <label class="ok"><input type="checkbox" name="acepto" required> Declaro que los datos surgen de la normativa indicada y acepto que la Fundación Apertura los publique en revisión y me contacte si hace falta. Mis datos de contacto no se publican.</label>
+        <p class="ferr" role="alert" hidden></p>
+        <div class="fbtns"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="submit" class="btn">Sumar al mapa</button></div>
+      </form>
+
+      <div id="f-done" class="done" hidden>
+        <div class="done-ic" aria-hidden="true">✓</div>
+        <h3 id="done-t">¡Gracias!</h3>
+        <p id="done-p"></p>
+        <div class="fbtns"><button type="button" class="btn ghost" data-close>Cerrar</button><button type="button" class="btn" id="done-ver" hidden>Ver en el mapa</button></div>
+      </div>
+    </div>
+  </dialog>
+
+  <footer class="foot">
+    <div><p id="tt-metodo"></p><p id="tt-links"></p></div>
+    <div><p><span class="status" id="tt-status"><i></i><span>Cargando datos…</span></span></p><p id="tt-corte"></p><p>Mapa: límites y ubicaciones del IGN y del servicio Georef (datos.gob.ar). Fondo: Esri (gris claro) y Argenmap (IGN).</p></div>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+/* ============================================================
+   CONFIGURACIÓN — lo único que hay que editar para conectar la planilla
+   ============================================================ */
+const TT_CONFIG = {
+  SHEET_ID: "1LByeMaEhX3zpyqI7fxICaQzmkuu2BNn9q_eQwM-Vy5A", // ID de la planilla de Google Sheets (entre /d/ y /edit). Vacío = usa los datos incluidos en este archivo.
+  TABS: { localidades: "localidades", actividades: "actividades", notas: "notas", config: "config", contribuciones: "contribuciones" },
+  IGN_POLYGONS: true,        // dibuja los ejidos municipales con el servicio WFS del IGN
+  GEOREF: true,              // ubica localidades sin lat/lon con la API Georef
+  BASEMAP: true,             // muestra un fondo de mapa
+  BASEMAP_STYLE: "claro",    // "claro" (gris suave, recomendado), "gris" (IGN con calles), "calles" (Argenmap IGN) o "ninguno". No requieren clave.
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwRa2jGY4B2ZPQnbVLJvjHc5nuQXG5lN-_f_gUfIb_lmv87Pwl8kUgBU4iwG-Y9SCw/exec", // dirección de la aplicación web de Apps Script que recibe los formularios. También puede cargarse en la pestaña config → apps_script_url
+  ENABLE_DOWNLOAD: true,
+  RADIO_KM: 0,               // anillo de referencia alrededor de la localidad de referencia (0 = sin anillo)
+  PROVINCIAS_COMPLETAS: ["Santa Fe"] // muestra todos los municipios y comunas de estas provincias (listado oficial Georef); las que no están en la planilla aparecen «sin relevar». También: config → provincias_completas
+};
+/* ============================================================ */
+
+const SEED = {"contribuciones": [{"id": "ROS", "actividad": "gastronomia", "alicuota": 1.0, "minimo": 20, "unidad_minimo": "MT", "concepto": "Contribución ETuR (Ente Turístico Rosario)", "detalle": "Contribución ETuR 1‰ (mínimo 20 MT)"}, {"id": "ROS", "actividad": "financieras", "alicuota": 1.0, "minimo": 6.8, "unidad_minimo": "MT", "concepto": "Contribución ETuR (Ente Turístico Rosario)", "detalle": "Contribución ETuR 1‰ (mínimo 6,8 MT)"}, {"id": "ROS", "actividad": "grandes_sup", "alicuota": 1.0, "minimo": 20, "unidad_minimo": "MT", "concepto": "Contribución ETuR (Ente Turístico Rosario)", "detalle": "Contribución ETuR 1‰ (mínimo 20 MT)"}], "localidades": [{"id": "ROS", "localidad": "Rosario", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad (cabecera)", "estado": "relevada", "ign_id": "820210", "lat": -32.9472, "lon": -60.6332, "km_rosario": 0, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios generales. Contribución ETuR (Ente Turístico Rosario, ente autárquico financiado en parte con estos fondos): alícuota adicional sobre la base del DReI para actividades turísticas: bares, pizzerías y restaurantes turísticos 1‰ (mínimo 20 MT); agencias de viajes, casas de cambio y entidades financieras 1‰ (6,8 MT); grandes centros comerciales 1‰ (20 MT); hoteles 2‰ (27 MT); casinos, night clubs y bares nocturnos 1‰ (13,5 MT); confiterías bailables y alquiler turístico temporario, importe fijo. Opcionales: publicidad 3% / 9%; mesas y sillas 12,5%.", "al_general": 6.5, "al_industria": 6.5, "al_ind_alim": 6.5, "al_com_min": 6.5, "al_com_alim": 6.0, "al_mayorista": 6.5, "al_construccion": 6.0, "al_gastronomia": 6.5, "al_transporte": 6.0, "al_software": 6.0, "al_grandes_sup": 20.0, "al_combustibles": 6.0, "al_financieras": 50.0, "minimos": "Mínimo mensual por local según personal: 0 empl. 38 MT; 1: 52 MT; 2-5: 142 MT; 6-9: 412 MT; 10 o más: 610 MT. Régimen simplificado 34 a 203 MT.", "regimenes_especiales": "Acopiadores por cuenta propia 48‰; divisas y entidades financieras 50‰; night clubs y casinos 70‰.", "evolucion_2024_2026": "La reforma vigente desde enero de 2024 (Ord. 10.578) fijó la general en 6,5‰ y subió diferenciales (intermediación 15,75→20‰; financieras 39→50‰). El módulo tributario pasó de $79 a $526 (+88% real).", "var_real_minimos": 88, "normativa": "Ordenanza General Impositiva N° 4064/86 (texto actualizado), modif. Ord. 10.578/23, 10.750/24, 10.872/25 y 10.893", "unidad_valor": "Módulo Tributario (MT): $526,00 (1/10/2026)", "fuente_url": "https://www.rosario.gob.ar/mr/normativa/ordenanza-impositiva/ordenanza-4064-1986", "fecha_relevamiento": "2026-10-19"}, {"id": "VGG", "localidad": "Villa Gobernador Gálvez", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820217", "lat": -33.0251, "lon": -60.6337, "km_rosario": 10, "adicional_oblig": 10.0, "adicional_detalle": "Obligatorios: FEMPIAS 5% y FONDEPRO 5% sobre el DReI. Opcionales: publicidad 8%; mesas y sillas 25%.", "al_general": 6.75, "al_industria": 6.75, "al_ind_alim": 5.75, "al_com_min": 6.75, "al_com_alim": 5.75, "al_mayorista": 6.75, "al_construccion": 5.75, "al_gastronomia": 6.75, "al_transporte": 6.75, "al_software": 6.75, "al_grandes_sup": 11.0, "al_combustibles": 5.75, "al_financieras": 30.0, "minimos": "Mínimo por personas afectadas (incluye socios y directores): 0: 8 UTM; 1: 13; 2-5: 18; 6-9: 50; 10-19: 75; 20 o más: 115 UTM. Locales >15.000 m²: 0,039 a 0,051 UTM/m² (Área Industrial 75%).", "regimenes_especiales": "Industrialización/almacenamiento de granos o minerales con puerto, silos o alto consumo energético: cuota fija 50.000 UTM/mes (≈ $140 M).", "evolucion_2024_2026": "Sin cambios de alícuota ni de fondos afectados. La UTM pasó de $950 a $2.800 (−17% real).", "var_real_minimos": -17, "normativa": "Ordenanza Tributaria 2026 N° 3209/2025 (modif. Ord. 3212/2025)", "unidad_valor": "Unidad Tributaria Municipal (UTM): $2.800,00 (1/11/2025 (Dto. 5717/2025))", "fuente_url": "https://concejovgg.gob.ar/ordenanza-3209-2025-ordenanza-tributaria-2026/", "fecha_relevamiento": "2026-10-19"}, {"id": "PER", "localidad": "Pérez", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820203", "lat": -32.9989, "lon": -60.7699, "km_rosario": 13, "adicional_oblig": 3.0, "adicional_detalle": "Obligatorio: Fondo de Protección y Seguridad Industrial (FOPROSI) 3%. Opcionales: publicidad 3%; uso de vía pública 10%.", "al_general": 6.0, "al_industria": 6.0, "al_ind_alim": 6.0, "al_com_min": 6.0, "al_com_alim": 6.0, "al_mayorista": 6.0, "al_construccion": 6.0, "al_gastronomia": 20.0, "al_transporte": 6.0, "al_software": 10.0, "al_grandes_sup": 6.0, "al_combustibles": 4.5, "al_financieras": 13.0, "minimos": "Escala de 17 categorías por personal y superficie (la mayor): desde 90 UVT (1-2 personas, hasta 40 m²) hasta 41.300 UVT (más de 10.000 m²).", "regimenes_especiales": "Generación de energía 5‰; transporte y distribución eléctrica mín. 17.550 UVT; entidades financieras 13‰ (mín. 88.000 UVT).", "evolucion_2024_2026": "Nuevo Código Tributario y Ordenanza Tributaria Anual desde 2025. Unidad de valor por debajo de la inflación (−29% real).", "var_real_minimos": -29, "normativa": "Código Tributario Municipal (Ord. 3746) y Ordenanza Tributaria Anual N° 3747, modif. Ord. 3761/25, 3869/25 y 3876/26", "unidad_valor": "Unidad de Valor Tributario (UVT): $169,00 (octubre 2026 (Dto. 211/2026))", "fuente_url": "https://www.perezciudad.com.ar/home/pages/sistema/boletinOficial.html", "fecha_relevamiento": "2026-10-19"}, {"id": "FUN", "localidad": "Funes", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820189", "lat": -32.9209, "lon": -60.8114, "km_rosario": 15, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales porcentuales obligatorios. Cargos fijos por cuenta (fondos de transporte, repavimentación, disposición final). Exhibición en vereda 25%.", "al_general": 6.5, "al_industria": 3.0, "al_ind_alim": 3.0, "al_com_min": 6.5, "al_com_alim": 4.0, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 15.0, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 15.0, "al_financieras": 6.5, "minimos": "Mínimo por personal (pesos, sin actualizar desde 2024): sin personal $4.892–$7.338; 1: $12.000; 2: $19.568; 3-4: $26.906; 5-9: $40.359; 10 o más: $67.265.", "regimenes_especiales": "Estaciones de servicio mín. $1.500.000; desarrollos inmobiliarios $100.000 a $1.800.000 por mes según lotes; depósitos de empresas foráneas por m².", "evolucion_2024_2026": "Alícuotas sin cambios desde 2012. Mínimos fijados en mayo de 2024 y congelados (−53% real).", "var_real_minimos": -53, "normativa": "Ordenanza Tributaria N° 078/94 (texto actualizado), Ord. 824/12, 1735/24; Ord. 1913/25 (tributaria 2026: no incrementa alícuotas ni mínimos del DReI)", "unidad_valor": "Pesos (montos fijos): $1,00 (mayo 2024 (Ord. 1735/24))", "fuente_url": "https://www.ecofield.net/Legales/Ord/Funes_SFE/or78-94_Funes_SFE.htm", "fecha_relevamiento": "2026-10-19"}, {"id": "GBA", "localidad": "Granadero Baigorria", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820196", "lat": -32.8618, "lon": -60.7063, "km_rosario": 12, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios. Opcionales: publicidad 2% / 8%; mesas y sillas 25% (oct-mar), decks 50%.", "al_general": 6.5, "al_industria": 5.5, "al_ind_alim": 5.5, "al_com_min": 6.5, "al_com_alim": 6.5, "al_mayorista": 6.5, "al_construccion": 5.0, "al_gastronomia": 9.0, "al_transporte": 9.0, "al_software": 9.0, "al_grandes_sup": 16.0, "al_combustibles": 18.0, "al_financieras": 18.0, "minimos": "Mínimos por personal: pequeñas empresas 38 a 255 MT; resto 64 MT (sin personal) a 800 MT (más de 10). Depósitos y galpones 190 a 2.000 MT.", "regimenes_especiales": "Grandes superficies 16‰; boliches 45‰. En 2024 eliminó 35 tasas y redujo alícuotas.", "evolucion_2024_2026": "Nueva OGI (feb-2024): eliminó 36 tasas y cánones y creó una tasa vial. Módulo con ajuste mensual automático.", "var_real_minimos": "", "normativa": "Ordenanza General Impositiva N° 5984/24 (Dto. 0220/24); resumen oficial DReI (2026)", "unidad_valor": "Módulo Tributario (MT) ($120,39 a 08/2024; actualización mensual automática (valor 2026 no publicado))", "fuente_url": "https://baigorria.gob.ar/drei/", "fecha_relevamiento": "2026-10-19"}, {"id": "CBE", "localidad": "Capitán Bermúdez", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820266", "lat": -32.8265, "lon": -60.7162, "km_rosario": 15, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios. Opcionales: publicidad 2% / 8%; vereda 25%; cerramientos 30%; pantallas en bares 25%.", "al_general": 6.8, "al_industria": 6.3, "al_ind_alim": 6.3, "al_com_min": 6.8, "al_com_alim": 6.8, "al_mayorista": 6.8, "al_construccion": 6.8, "al_gastronomia": 18.0, "al_transporte": 6.8, "al_software": 6.8, "al_grandes_sup": 6.8, "al_combustibles": 6.8, "al_financieras": 18.0, "minimos": "Mínimo por superficie: 40.000 MT (hasta 50 m²) a 6.500.000 MT (más de 50.000 m²). Pequeños contribuyentes: 30.000 MT fijo.", "regimenes_especiales": "Monto especial complementario de 1.100.000 MT/mes para actividades con consumo energético, transporte de cargas o almacenamiento sin base imponible; entidades financieras mín. 40.000.000 MT.", "evolucion_2024_2026": "Texto ordenado 2026 (Ord. 1342) con ajuste trimestral de módulos por IPC.", "var_real_minimos": "", "normativa": "Ordenanza General Impositiva 2026 N° 1342 (texto ordenado; reemplaza Ord. 1314/24)", "unidad_valor": "Módulo Tributario (MT) (valor no publicado; actualización trimestral por IPC-IPEC)", "fuente_url": "https://www.capitanbermudez.gob.ar/tramites-online/formularios-tributos", "fecha_relevamiento": "2026-10-19"}, {"id": "FLB", "localidad": "Fray Luis Beltrán", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820280", "lat": -32.7815, "lon": -60.731, "km_rosario": 20, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios. Opcionales: publicidad 2% / 8%; mesas y sillas 25%; decks 50%; pantallas 25%.", "al_general": 5.0, "al_industria": 8.0, "al_ind_alim": 8.0, "al_com_min": 5.0, "al_com_alim": 5.0, "al_mayorista": 5.0, "al_construccion": 8.0, "al_gastronomia": 5.0, "al_transporte": 5.0, "al_software": 5.0, "al_grandes_sup": 5.0, "al_combustibles": 5.0, "al_financieras": 9.0, "minimos": "Mínimo por superficie: $16.000 (hasta 10 m²) a $2.612.000 + $100/m² (más de 50.000 m²). Nuevos comercios: sin DReI los primeros 90 días.", "regimenes_especiales": "Acopiadores 9‰; remediación ambiental 9‰.", "evolucion_2024_2026": "Dos actualizaciones en 2026: mínimos +13% en seis meses; mínimo bancario de $4,5 M a $20 M.", "var_real_minimos": "", "normativa": "Ordenanza Tributaria actualizada por Ord. 15/26 (6/10/2026)", "unidad_valor": "Pesos: $1,00 (octubre 2026)", "fuente_url": "https://frayluisbeltran.gov.ar/docs/ORD-015-2026.pdf", "fecha_relevamiento": "2026-10-19"}, {"id": "SLO", "localidad": "San Lorenzo", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820301", "lat": -32.7473, "lon": -60.7357, "km_rosario": 25, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales porcentuales obligatorios relevados.", "al_general": 6.5, "al_industria": 5.0, "al_ind_alim": 5.0, "al_com_min": 6.5, "al_com_alim": 5.3, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 6.5, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 6.5, "al_financieras": 18.0, "minimos": "Mínimo por superficie: $7.300 (hasta 10 m²) a $3.060.000 + $24/m² (más de 50.000 m²).", "regimenes_especiales": "Mínimos agroindustria/cereales $66,5 M/mes; derivados del petróleo $86,5 M/mes; biocombustibles $40 M/mes. Acopiadores 45‰.", "evolucion_2024_2026": "Alícuotas sin cambios. Montos fijos actualizados una vez por año (mínimo 10–50 m²: +3% real).", "var_real_minimos": 3, "normativa": "Ordenanza Impositiva N° 1835 (texto vigente; diferenciales Ord. 3458/15 y 3954/20); valores 2026 por Ord. 4281 (13/10/2025)", "unidad_valor": "Pesos: $1,00 (2026 (Ord. 4281))", "fuente_url": "https://sanlorenzo.gob.ar/ordenanza-no-4281-ordenanza-impositiva-2025/", "fecha_relevamiento": "2026-10-19"}, {"id": "PGS", "localidad": "Puerto General San Martín", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820287", "lat": -32.716, "lon": -60.7314, "km_rosario": 27, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios sobre el DReI.", "al_general": 5.0, "al_industria": 5.0, "al_ind_alim": 2.5, "al_com_min": 5.0, "al_com_alim": 2.5, "al_mayorista": 5.0, "al_construccion": 5.0, "al_gastronomia": 5.0, "al_transporte": 5.0, "al_software": 5.0, "al_grandes_sup": 5.0, "al_combustibles": 2.5, "al_financieras": 13.0, "minimos": "Mínimo general $15.000/mes; entidades financieras $5.203.800/mes.", "regimenes_especiales": "Régimen especial agroexportador: 1ª categoría $159,1 M/mes; adicionales de $81,3 M por generación eléctrica y 2ª categoría; generación eléctrica 6% del kWh.", "evolucion_2024_2026": "Alícuotas sin cambios. Mínimo general de $3.700 a $15.000 (+15% real); cuota agro +25% real.", "var_real_minimos": 15, "normativa": "Ordenanza Tributaria N° 035/25, modif. Ord. 006/26 y 020/26 (24/9/2026)", "unidad_valor": "Pesos: $1,00 (septiembre 2026)", "fuente_url": "https://www.mpgsm.gob.ar/drei/", "fecha_relevamiento": "2026-10-19"}, {"id": "ASE", "localidad": "Arroyo Seco", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820182", "lat": -33.1581, "lon": -60.5119, "km_rosario": 32, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales porcentuales obligatorios relevados.", "al_general": 6.83, "al_industria": 6.83, "al_ind_alim": 6.83, "al_com_min": 6.83, "al_com_alim": 8.0, "al_mayorista": 8.0, "al_construccion": 8.0, "al_gastronomia": 6.83, "al_transporte": 6.83, "al_software": 6.83, "al_grandes_sup": 6.83, "al_combustibles": 8.0, "al_financieras": 50.0, "minimos": "Mínimo por local: 15 MT (sin personal) a 375 MT (7 o más empleados y/o más de 1.500 m²).", "regimenes_especiales": "Régimen especial: agro con puerto 90.000 MT; agro con silos/flete 15.930 MT; petróleo 100.440 MT; biocombustibles 7.110–38.430 MT; tasa de organización portuaria $1,5 M/empresa + por camión; nueva tasa de tránsito pesado (2026).", "evolucion_2024_2026": "Ordenanza 2024 vigente; en 2026 sumó tasas de tránsito pesado y de excavaciones.", "var_real_minimos": "", "normativa": "Ordenanza General Tributaria N° 3256/2024 (texto vigente en Digesto), modif. 3499/25, 3589/26, 3590/26 y 3601/26", "unidad_valor": "Módulo Tributario (MT) (valor 2026 no publicado (inicial $150))", "fuente_url": "https://arroyoseco.gov.ar/digesto/normativa.php?id=90", "fecha_relevamiento": "2026-10-19"}, {"id": "TIM", "localidad": "Timbúes", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna / municipio (Ley 14.436)", "estado": "relevada", "ign_id": "824030", "lat": -32.6678, "lon": -60.7936, "km_rosario": 35, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios relevados.", "al_general": 5.25, "al_industria": 5.0, "al_ind_alim": 5.0, "al_com_min": 5.25, "al_com_alim": 5.25, "al_mayorista": 5.25, "al_construccion": 5.0, "al_gastronomia": 5.25, "al_transporte": 5.25, "al_software": 5.25, "al_grandes_sup": 5.25, "al_combustibles": 5.25, "al_financieras": 30.0, "minimos": "Régimen simplificado (monotributistas) 115 a 2.320 MT; mínimos por actividad (gastronomía 1.091–4.171 MT).", "regimenes_especiales": "Régimen especial agroindustrial/portuario: 276.650 MT/mes (≈ $34,5 M) hasta 150.000 t, escala hasta 3.475.700 MT (≈ $433,6 M). RIPI: exención 100% del DReI y estabilidad fiscal por 10 años para inversiones adheridas.", "evolucion_2024_2026": "Alícuotas sin cambios. RIPI (exención total del DReI para nuevas inversiones) y Régimen de Competitividad Portuaria II.", "var_real_minimos": "", "normativa": "Ordenanza Tributaria Tarifaria 2026 N° 160/2025; MT por Ord. 158/25, 41/26, 68/26 y 096/26; RIPI Ord. 152/2024", "unidad_valor": "Módulo Tributario (MT): $124,75 (1/10/2026 (Ord. 096/2026))", "fuente_url": "https://timbues.gob.ar/index.php?pagina=detalle&idp=1250", "fecha_relevamiento": "2026-10-19"}, {"id": "GLA", "localidad": "General Lagos", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna / municipio (Ley 14.436)", "estado": "relevada", "ign_id": "823407", "lat": -33.11, "lon": -60.5646, "km_rosario": 25, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios relevados. Exportadores: +108 MF/mes.", "al_general": 6.0, "al_industria": 6.0, "al_ind_alim": 6.0, "al_com_min": 6.0, "al_com_alim": 6.0, "al_mayorista": 6.0, "al_construccion": 6.0, "al_gastronomia": 6.0, "al_transporte": 6.0, "al_software": 6.0, "al_grandes_sup": 6.0, "al_combustibles": 6.0, "al_financieras": 6.0, "minimos": "Mínimo general 0,55 MF (≈ $24.750). Industrias: 11 MF (hasta 5 empleados) a 121 MF (más de 20 empleados).", "regimenes_especiales": "Acopio/procesamiento agro con puerto: 212 a 1.361 MF/mes; químicos 1.175 MF; exportadores +108 MF.", "evolucion_2024_2026": "Alícuota sin cambios. En 2026 pasa a Módulo Fiscal con ajuste trimestral; mínimo general +147% real.", "var_real_minimos": 147, "normativa": "Ordenanza Tributaria 2026 N° 2/2026 (BO Santa Fe 27/01/2026)", "unidad_valor": "Módulo Fiscal (MF): $45.000,00 (ene-mar 2026 (actualización trimestral IPEC))", "fuente_url": "https://www.santafe.gob.ar/boletinoficial/ver.php?seccion=2026/2026-01-27avisospriv.html", "fecha_relevamiento": "2026-10-19"}, {"id": "LPA", "localidad": "Luis Palacios", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna / municipio (Ley 14.436)", "estado": "relevada", "ign_id": "824002", "lat": -32.7823, "lon": -60.9046, "km_rosario": 30, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios relevados.", "al_general": 6.5, "al_industria": 6.5, "al_ind_alim": 2.5, "al_com_min": 6.5, "al_com_alim": 6.5, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 6.5, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 6.5, "al_financieras": 15.0, "minimos": "Escala de mínimos publicada como imagen (no legible en el texto oficial).", "regimenes_especiales": "Sobretasa 100% de TGI en zona industrial, eximible con proyecto de inversión.", "evolucion_2024_2026": "En 2026 crea la Unidad Tributaria Comunal.", "var_real_minimos": "", "normativa": "Ordenanza Tributaria 2026 N° 04/2026 (BO Santa Fe 13/02/2026)", "unidad_valor": "Unidad Tributaria Comunal (UTC): $20,00 (feb-2026 (valor inicial, actualizable))", "fuente_url": "https://www.santafe.gob.ar/boletinoficial/ver.php?seccion=2026/2026-02-13avisospriv.html", "fecha_relevamiento": "2026-10-19"}, {"id": "ALV", "localidad": "Alvear", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad (declarada 2024)", "estado": "relevada", "ign_id": "823372", "lat": -33.0578, "lon": -60.6198, "km_rosario": 15, "adicional_oblig": 15.0, "adicional_detalle": "Obligatorio: Tasa de servicio de atención médica organizada 15% sobre el DReI. Opcionales: publicidad 2% / 8%; mesas y sillas 25%.", "al_general": 6.5, "al_industria": 6.5, "al_ind_alim": 6.5, "al_com_min": 6.5, "al_com_alim": 5.5, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 6.5, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 6.5, "al_financieras": 150.0, "minimos": "Hasta 100 m²: 0,10 a 0,80 MF. Más de 100 m²: el mayor entre 0,36% MF por m² cubierto y la escala MiPyME (micro 5 MF; pequeña 8; mediana 12 / 24 MF).", "regimenes_especiales": "Agro con puerto y silos: 200 / 600 / 1.500 MF/mes según toneladas; acopio por cuenta propia 25‰ sobre diferencia.", "evolucion_2024_2026": "Alícuotas y adicional sin cambios. Módulo Fiscal −23% real; cuota agroportuaria máxima de 300 a 1.500 MF.", "var_real_minimos": -23, "normativa": "Ordenanza Tributaria N° 1029/2024 y Código Fiscal Ord. 1030/2024; Módulo Fiscal 2026 por Ord. 1080/2025", "unidad_valor": "Módulo Fiscal (MF): $61.100,00 (2° trimestre 2026)", "fuente_url": "https://comunadealvear.gob.ar/comuna/index.php?pagina=hacienda", "fecha_relevamiento": "2026-10-19"}, {"id": "ROL", "localidad": "Roldán", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820294", "lat": -32.8981, "lon": -60.9096, "km_rosario": 25, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios. Opcional: adicional por ocupación de la vía pública.", "al_general": 6.5, "al_industria": 6.5, "al_ind_alim": 6.5, "al_com_min": 6.5, "al_com_alim": 6.5, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 6.5, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 15.0, "al_financieras": 28.5, "minimos": "Por personas ocupadas (incluye titulares): 1 persona $12.900; 2: $25.900; 3 a 5: $51.800; 6 a 10: $109.000; 11 a 20: $287.000; más de 20: $579.000.", "regimenes_especiales": "Régimen diferencial para industrialización, acopio o comercialización de granos con silos (art. 53-54): el mayor entre $138.700 por celda o silo y $222,22 por tonelada de capacidad (alimentos), con tope de $2,16 M para el mero almacenamiento (valores abr-2025). Producción primaria exenta.", "evolucion_2024_2026": "Alícuotas sin cambios desde 2021. El umbral de $140 M anuales que activa el 7,5‰ no se actualizó. Mínimos +6% real (abr-25 a jul-26).", "var_real_minimos": 6, "normativa": "Ordenanza Tributaria N° 1101/21 (arts. 37 a 54) con montos actualizados por Decreto 01.105/25 (abr-2025) y Decreto 01.181/26 (desde período julio 2026)", "unidad_valor": "Montos fijos en pesos (sin módulo) (actualización trimestral por coeficiente (65% salarios municipales, 15% gasoil, 20% IPIM); último ajuste período julio 2026)", "fuente_url": "https://www.roldan.gov.ar/wp/modificacion-de-las-alicuotas-y-de-los-valores-por-derechos-minimos/", "fecha_relevamiento": "2026-10-19"}, {"id": "PES", "localidad": "Pueblo Esther", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Ciudad", "estado": "relevada", "ign_id": "820207", "lat": -33.0723, "lon": -60.575, "km_rosario": 20, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios. Opcionales: publicidad interior 2%; mesas y artículos en la vía pública 20%.", "al_general": 6.5, "al_industria": 5.5, "al_ind_alim": 5.5, "al_com_min": 6.5, "al_com_alim": 6.5, "al_mayorista": 6.5, "al_construccion": 6.5, "al_gastronomia": 6.5, "al_transporte": 6.5, "al_software": 6.5, "al_grandes_sup": 6.5, "al_combustibles": 6.5, "al_financieras": 8.55, "minimos": "Por personal ocupado en cada local: sin personal $9.000; hasta 2 empleados $16.000; hasta 5: $36.000; hasta 10: $96.000; hasta 20: $173.000; más de 20: $223.000. Régimen simplificado (monotributo A y B): $6.500 y $8.500.", "regimenes_especiales": "Desarrollos urbanos e inmobiliarios 3‰ sobre el valor de venta de cada lote; hoteles y venta de inmuebles 3,5‰; telefonía celular y extracción de arena 8‰; intermediación y venta minorista de arena a granel 30‰.", "evolucion_2024_2026": "Alícuotas básicas sin cambios. Mínimos ×4,3 entre 2024 y 2026 (+50% real). 2026: arena 8‰ y 30‰.", "var_real_minimos": 50, "normativa": "Ordenanza Impositiva Ejercicio 2026 N° 35/2025 (arts. 17 a 35), art. 21 modificado por Ord. 01/2026 (26/03/2026)", "unidad_valor": "Montos fijos en pesos (sin módulo) (valores fijados para el ejercicio 2026)", "fuente_url": "https://digestoonline.com.ar/consulta/puebloesther/12099", "fecha_relevamiento": "2026-10-19"}, {"id": "SJS", "localidad": "San Jerónimo Sud", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna / municipio (Ley 14.436)", "estado": "relevada", "ign_id": "824023", "lat": -32.8794, "lon": -61.0277, "km_rosario": 38, "adicional_oblig": 0.0, "adicional_detalle": "Sin adicionales obligatorios relevados.", "al_general": 7.0, "al_industria": 7.0, "al_ind_alim": 7.0, "al_com_min": 7.0, "al_com_alim": 7.0, "al_mayorista": 7.0, "al_construccion": 7.0, "al_gastronomia": 7.0, "al_transporte": 7.0, "al_software": 7.0, "al_grandes_sup": 7.0, "al_combustibles": 10.0, "al_financieras": 45.0, "minimos": "Mínimo general 10 UF ($23.000). Industrias 100 UF (hasta 200 m²) o 200 UF; distribuidoras mayoristas 100 UF; supermercados 70 a 100 UF; kioscos 30 a 50 UF; carnicerías 60 UF; bares y restaurantes 10 o 20 UF según mesas; bancos 1.200 UF; monotributistas 4 a 16 UF según categoría.", "regimenes_especiales": "Agroindustria y acopio con silos: cuota mínima mensual de 240 UF (hasta 50.000 t) a 73.920 UF (más de 1 Mt). Hoteles alojamiento, confiterías bailables y similares 6% (60‰); salas de juegos 1%.", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Ordenanza General Impositiva 2026 N° 1068 (arts. 22 a 34)", "unidad_valor": "Unidad Fiscal (UF): $2.300,00 (2026; actualización trimestral por el mayor entre IPC Santa Fe, gasoil y costo de la construcción)", "fuente_url": "https://sjs083.gotdns.org/ordenanzas/138086049040.html", "fecha_relevamiento": "2026-10-19"}, {"id": "IBA", "localidad": "Ibarlucea", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823414", "lat": -32.8519, "lon": -60.7855, "km_rosario": 15, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria 2026 publicada en sitio oficial ni en Boletín Oficial.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "RIC", "localidad": "Ricardone", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "824016", "lat": -32.7706, "lon": -60.7841, "km_rosario": 22, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Últimas publicaciones en Boletín Oficial: 2019–2020.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "SOL", "localidad": "Soldini", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823442", "lat": -33.0276, "lon": -60.7568, "km_rosario": 18, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "ZAV", "localidad": "Zavalla", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823463", "lat": -33.0196, "lon": -60.8785, "km_rosario": 25, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "PIN", "localidad": "Piñero", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823421", "lat": -33.1091, "lon": -60.7961, "km_rosario": 25, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "ALZ", "localidad": "Álvarez", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823365", "lat": -33.1281, "lon": -60.8062, "km_rosario": 28, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "CDO", "localidad": "Coronel Domínguez", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823470", "lat": -33.1837, "lon": -60.722, "km_rosario": 28, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "FIG", "localidad": "Fighiera", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823400", "lat": -33.1939, "lon": -60.4694, "km_rosario": 38, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}, {"id": "ALD", "localidad": "Aldao", "provincia": "Santa Fe", "region": "Gran Rosario", "tipo": "Comuna", "estado": "sin_normativa", "ign_id": "823981", "lat": -32.7045, "lon": -60.8159, "km_rosario": 35, "adicional_oblig": "", "adicional_detalle": "", "al_general": "", "al_industria": "", "al_ind_alim": "", "al_com_min": "", "al_com_alim": "", "al_mayorista": "", "al_construccion": "", "al_gastronomia": "", "al_transporte": "", "al_software": "", "al_grandes_sup": "", "al_combustibles": "", "al_financieras": "", "minimos": "", "regimenes_especiales": "", "evolucion_2024_2026": "", "var_real_minimos": "", "normativa": "Sin ordenanza tributaria publicada en línea.", "unidad_valor": "", "fuente_url": "", "fecha_relevamiento": "2026-10-19"}], "actividades": [{"clave": "general", "etiqueta": "General", "descripcion": "Alícuota general: comercio y servicios sin tratamiento especial", "orden": 1, "visible": "si"}, {"clave": "industria", "etiqueta": "Industria", "descripcion": "Industria manufacturera fuera de parques industriales", "orden": 2, "visible": "si"}, {"clave": "ind_alim", "etiqueta": "Industria alimenticia", "descripcion": "Elaboración de alimentos", "orden": 3, "visible": "si"}, {"clave": "com_min", "etiqueta": "Comercio minorista", "descripcion": "Comercio minorista en general", "orden": 4, "visible": "si"}, {"clave": "com_alim", "etiqueta": "Comercio de alimentos", "descripcion": "Almacenes, verdulerías, carnicerías, panaderías", "orden": 5, "visible": "si"}, {"clave": "mayorista", "etiqueta": "Mayorista", "descripcion": "Comercio mayorista y distribución", "orden": 6, "visible": "si"}, {"clave": "construccion", "etiqueta": "Construcción", "descripcion": "Empresas constructoras", "orden": 7, "visible": "si"}, {"clave": "gastronomia", "etiqueta": "Gastronomía", "descripcion": "Bares y restaurantes", "orden": 8, "visible": "si"}, {"clave": "transporte", "etiqueta": "Logística", "descripcion": "Transporte de cargas y logística", "orden": 9, "visible": "si"}, {"clave": "software", "etiqueta": "Software y servicios", "descripcion": "Software y servicios basados en el conocimiento", "orden": 10, "visible": "si"}, {"clave": "grandes_sup", "etiqueta": "Grandes superficies", "descripcion": "Hipermercados y grandes superficies comerciales", "orden": 11, "visible": "si"}, {"clave": "combustibles", "etiqueta": "Combustibles", "descripcion": "Venta de combustibles", "orden": 12, "visible": "si"}, {"clave": "financieras", "etiqueta": "Entidades financieras", "descripcion": "Bancos y entidades de la Ley 21.526", "orden": 13, "visible": "si"}], "notas": [{"id": "ROS", "actividad": "ind_alim", "nota": "6‰ si es industria minorista de alimentos"}, {"id": "ROS", "actividad": "com_alim", "nota": "5‰ almacenes, verdulerías, carnicerías y panaderías de una sola unidad"}, {"id": "ROS", "actividad": "mayorista", "nota": "9‰ si los ingresos anuales superan $28.997 M"}, {"id": "ROS", "actividad": "grandes_sup", "nota": "Régimen promocional: 10‰ / 11‰ / 12‰ según facturación"}, {"id": "ROS", "actividad": "combustibles", "nota": "6‰ para sujetos pasivos del impuesto a los combustibles"}, {"id": "ROS", "actividad": "software", "nota": "Industria del software 6‰"}, {"id": "VGG", "actividad": "industria", "nota": "5‰ en el Área Industrial y Distritos I2 / I2-1"}, {"id": "VGG", "actividad": "transporte", "nota": "Distribuidores fleteros 15,5‰"}, {"id": "VGG", "actividad": "com_alim", "nota": "Comercios de alimentos de menos de 1.200 m²"}, {"id": "VGG", "actividad": "grandes_sup", "nota": "Comercio de más de 1.200 m²"}, {"id": "PER", "actividad": "industria", "nota": "Acerías y metalúrgicas de más de 30.000 m²: 5‰"}, {"id": "PER", "actividad": "construccion", "nota": "5‰ para empresas con facturación anual ≥ $250 M"}, {"id": "PER", "actividad": "gastronomia", "nota": "Bares, restaurantes y rotiserías 20‰ (mín. 365 UVT)"}, {"id": "PER", "actividad": "software", "nota": "Software, internet, intermediación e inmobiliarias 10‰"}, {"id": "FUN", "actividad": "industria", "nota": "Industrias en general 3‰ (la menor del área)"}, {"id": "FUN", "actividad": "com_alim", "nota": "Alimentos de primera necesidad y medicamentos 4‰"}, {"id": "FUN", "actividad": "gastronomia", "nota": "Bares, restaurantes, pizzerías y rotiserías 15‰"}, {"id": "FUN", "actividad": "combustibles", "nota": "Venta por mayor y menor de combustibles 15‰; además Tasa de Mantenimiento Vial 1,6% del precio"}, {"id": "FUN", "actividad": "financieras", "nota": "Mínimo especial $1.000.000 (privadas)"}, {"id": "GBA", "actividad": "general", "nota": "6,5‰ para PyMEs; 8‰ para grandes empresas"}, {"id": "GBA", "actividad": "industria", "nota": "Fabricación/industria 5,5‰ (maquinaria agrícola: 6,5‰, PyME 5,5‰)"}, {"id": "GBA", "actividad": "transporte", "nota": "Transporte automotor de carga, servicios y montajes 9‰"}, {"id": "GBA", "actividad": "software", "nota": "Servicios en general 9‰"}, {"id": "GBA", "actividad": "combustibles", "nota": "Venta mayorista de combustibles en comisión 18‰ (surtidores: mínimo especial)"}, {"id": "CBE", "actividad": "industria", "nota": "Industria manufacturera, comercio de productos agropecuarios y comercio internacional 6,3‰"}, {"id": "CBE", "actividad": "gastronomia", "nota": "Restaurantes, parrillas, bares y pizzerías 18‰"}, {"id": "CBE", "actividad": "combustibles", "nota": "Base imponible: diferencia entre precio de venta y de compra"}, {"id": "FLB", "actividad": "industria", "nota": "Industria manufacturera 8‰ (mín. $260.000), por encima de la general; frigoríficos y mayoristas de carne 1‰"}, {"id": "FLB", "actividad": "construccion", "nota": "Construcción, montaje y mantenimiento industrial 8‰; materiales de construcción 6‰"}, {"id": "FLB", "actividad": "financieras", "nota": "9‰ con mínimo $20.000.000 (bancos)"}, {"id": "SLO", "actividad": "industria", "nota": "Industrias en general 5‰; papel, química, plásticos, vidrio, cemento y metálicas 6,3‰; fasoneros 7,5‰"}, {"id": "SLO", "actividad": "com_alim", "nota": "Comercio minorista de alimentos y farmacias 5,3‰"}, {"id": "PGS", "actividad": "com_alim", "nota": "Alimentos, lácteos, carnes, pan, bebidas y medicamentos 2,5‰"}, {"id": "PGS", "actividad": "combustibles", "nota": "Combustibles a precio oficial 2,5‰"}, {"id": "ASE", "actividad": "industria", "nota": "Frigoríficos y calzado 5‰; feedlot 1,5‰"}, {"id": "ASE", "actividad": "com_alim", "nota": "Alimentos, mayoristas, construcción, combustibles y transporte de pasajeros 8‰ (por encima de la general)"}, {"id": "ASE", "actividad": "software", "nota": "Telecomunicaciones 18‰"}, {"id": "TIM", "actividad": "industria", "nota": "Industria manufacturera y construcción 5‰; minerales no metalíferos 2,5‰; generación eléctrica 3,86‰"}, {"id": "TIM", "actividad": "financieras", "nota": "3% sobre base especial"}, {"id": "GLA", "actividad": "industria", "nota": "Alícuota general con cuotas mínimas por personal: alimentos, plásticos, metal y gráfica 11 a 121 MF/mes"}, {"id": "GLA", "actividad": "financieras", "nota": "Cuota fija 59 MF por sucursal"}, {"id": "LPA", "actividad": "ind_alim", "nota": "Industrias de la alimentación 2,5‰"}, {"id": "ALV", "actividad": "industria", "nota": "4,5‰ en el Parque Industrial Alvear, Micro Parque y AVANT"}, {"id": "ALV", "actividad": "com_alim", "nota": "Comercio minorista de alimentos (único local) 5,5‰"}, {"id": "ALV", "actividad": "financieras", "nota": "15% (150‰) con mínimo de 3 MF"}, {"id": "ROL", "actividad": "general", "nota": "7,5‰ si los ingresos brutos anuales totales del año anterior son iguales o superiores a $140 M (umbral fijado en 2021, sin actualizar)"}, {"id": "ROL", "actividad": "industria", "nota": "Sin diferencial industrial: 6,5‰ / 7,5‰ según el umbral de $140 M anuales"}, {"id": "ROL", "actividad": "combustibles", "nota": "15‰ sobre la diferencia entre precio de venta y costo (también cigarrillos y lotería)"}, {"id": "ROL", "actividad": "financieras", "nota": "28,5‰ con mínimo de $6.336.000 (bancos) y $2.553.000 (mutuales y otras)"}, {"id": "PES", "actividad": "industria", "nota": "Alícuota básica industria 5,5‰ (también actividad primaria)"}, {"id": "PES", "actividad": "ind_alim", "nota": "Alícuota básica industria 5,5‰"}, {"id": "PES", "actividad": "financieras", "nota": "8,55‰ (bancos, divisas, seguros, turismo, publicidad); mínimo $1.250.000 por sucursal bancaria"}, {"id": "PES", "actividad": "gastronomia", "nota": "Cantinas bailables y discotecas 3,5‰"}, {"id": "SJS", "actividad": "general", "nota": "0,70% para toda actividad sin tratamiento diferencial"}, {"id": "SJS", "actividad": "industria", "nota": "Sin alícuota diferencial; mínimo 100 UF (planta de hasta 200 m²) o 200 UF (más de 200 m²)"}, {"id": "SJS", "actividad": "gastronomia", "nota": "Mínimo 10 UF (hasta 5 mesas) o 20 UF (más de 5 mesas)"}, {"id": "SJS", "actividad": "combustibles", "nota": "1% (10‰) con mínimo de 100 UF"}, {"id": "SJS", "actividad": "financieras", "nota": "4,5% (45‰) con mínimo de 1.200 UF"}], "config": [{"clave": "titulo", "valor": "Transparencia Tributaria"}, {"clave": "bajada", "valor": "Cuánto cobra cada municipio del Gran Rosario por el Derecho de Registro e Inspección (DReI), la tasa municipal que pagan comercios, industrias y servicios sobre sus ventas."}, {"clave": "fecha_corte", "valor": "19 de octubre de 2026"}, {"clave": "localidad_referencia", "valor": "ROS"}, {"clave": "actividad_inicial", "valor": "general"}, {"clave": "cortes_leyenda", "valor": "5;6;6,5;7,5"}, {"clave": "url_informe", "valor": ""}, {"clave": "provincias_completas", "valor": "Santa Fe"}, {"clave": "apps_script_url", "valor": ""}, {"clave": "email_avisos", "valor": ""}, {"clave": "auto_publicar", "valor": "si"}, {"clave": "nota_metodologica", "valor": "Alícuotas en por mil (‰) sobre ingresos brutos devengados en la jurisdicción. La alícuota efectiva suma los adicionales obligatorios que se liquidan sobre el DReI para todos los contribuyentes; no incluye adicionales opcionales (publicidad, mesas y sillas). Los mínimos mensuales y regímenes especiales se detallan en la ficha de cada localidad. Fuente: ordenanzas tributarias vigentes relevadas por la Fundación Apertura."}]};
+
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const fmt = (v, d = 2) => v == null ? "s/d" : v.toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d});
+const money = v => "$" + Math.round(v).toLocaleString("es-AR");
+function num(v){
+  if (v == null) return null; if (typeof v === "number") return isFinite(v) ? v : null;
+  let s = String(v).trim(); if (!s) return null;
+  const pct = s.includes("%"); s = s.replace(/[%‰\s$]/g, "");
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  let n = parseFloat(s); if (isNaN(n)) return null; return pct ? n * 10 : n;
+}
+const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+const PROV = {"buenos aires":"06","ciudad autonoma de buenos aires":"02","caba":"02","catamarca":"10","cordoba":"14","corrientes":"18","chaco":"22","chubut":"26","entre rios":"30","formosa":"34","jujuy":"38","la pampa":"42","la rioja":"46","mendoza":"50","misiones":"54","neuquen":"58","rio negro":"62","salta":"66","san juan":"70","san luis":"74","santa cruz":"78","santa fe":"82","santiago del estero":"86","tucuman":"90","tierra del fuego":"94"};
+
+/* ---------- Estado ---------- */
+const S = { L: [], A: [], N: {}, C: {}, act: "general", mode: "ef", prov: "", reg: "", sel: null, ventas: null, tab: "rank", sort: null, live: false };
+
+/* ---------- Carga de datos ---------- */
+let ttSeq = 0;
+function sheetJsonp(tab){
+  /* Lectura por <script> (JSONP): funciona también al abrir el archivo desde la computadora (file://), donde Google bloquea fetch. */
+  return new Promise((resolve, reject) => {
+    const cb = "__ttSheet" + (++ttSeq), sc = document.createElement("script");
+    const done = () => { try { delete window[cb]; } catch(e){ window[cb] = undefined; } sc.remove(); clearTimeout(to); };
+    const to = setTimeout(() => { done(); reject(new Error("timeout")); }, 12000);
+    window[cb] = d => {
+      done();
+      if (!d || d.status === "error" || !d.table) return reject(new Error("sheet error"));
+      const labels = d.table.cols.map((c, k) => String(c.label || c.id || "c" + k).trim());
+      const rows = (d.table.rows || []).filter(r => r && r.c && r.c.some(c => c && c.v != null && c.v !== "")).map(x => x).filter(Boolean).map(r => { const o = {}; labels.forEach((h, k) => { const c = r.c[k]; let v = c == null ? "" : c.v; if (typeof v === "string" && v.startsWith("Date(")) v = c.f || v; o[h] = v == null ? "" : v; }); return o; });
+      resolve(rows);
+    };
+    sc.src = `https://docs.google.com/spreadsheets/d/${TT_CONFIG.SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cb}&headers=1&sheet=${encodeURIComponent(tab)}`;
+    sc.onerror = () => { done(); reject(new Error("script error")); };
+    document.head.appendChild(sc);
+  });
+}
+async function sheetCsv(tab){
+  const url = `https://docs.google.com/spreadsheets/d/${TT_CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+  const r = await fetch(url); if (!r.ok) throw new Error("HTTP " + r.status);
+  return Papa.parse(await r.text(), {header: true, skipEmptyLines: true, transformHeader: h => h.trim()}).data;
+}
+async function sheetTab(tab){
+  try { return await sheetJsonp(tab); } catch(e){ if (window.Papa) return await sheetCsv(tab); throw e; }
+}
+function mapRow(r){
+  const o = {...r}; o.id = String(r.id).trim();
+  o.lat = num(r.lat); o.lon = num(r.lon); o.km = num(r.km_rosario); o.adic = num(r.adicional_oblig) || 0;
+  const est = String(r.estado || "relevada").trim().toLowerCase();
+  o.sr = est === "sin_relevar"; o.ok = est !== "sin_normativa" && !o.sr; o.rev = est === "aportada";
+  o.ign = String(r.ign_id ?? "").replace(/\D/g, ""); if (o.ign) o.ign = o.ign.padStart(6, "0");
+  o.prov = String(r.provincia || "").trim(); o.reg = String(r.region || "").trim();
+  o.al = {}; S.A.forEach(a => o.al[a.clave] = o.ok ? num(r["al_" + a.clave]) : null);
+  return o;
+}
+async function loadData(){
+  let src = SEED;
+  if (TT_CONFIG.SHEET_ID){
+    try {
+      const [loc, act, notas, config, contrib] = await Promise.all(["localidades","actividades","notas","config","contribuciones"].map(k => sheetTab(TT_CONFIG.TABS[k]).catch(() => null)));
+      /* Google devuelve la primera hoja si una pestaña no existe: se valida cada una por sus columnas */
+      const ok = (rows, cols) => Array.isArray(rows) && rows.length > 0 && cols.every(c => c in rows[0]) ? rows : null;
+      const L_ = ok(loc, ["id", "localidad"]);
+      if (L_){ src = {localidades: L_, actividades: ok(act, ["clave", "etiqueta"]) || SEED.actividades, notas: ok(notas, ["id", "actividad", "nota"]) || [], config: ok(config, ["clave", "valor"]) || SEED.config, contribuciones: ok(contrib, ["id", "actividad", "alicuota"]) || SEED.contribuciones || []}; S.live = true; }
+    } catch(e){ /* se usa la copia incluida */ }
+  }
+  S.C = {}; (src.config || []).forEach(r => { if (r.clave) S.C[String(r.clave).trim()] = String(r.valor ?? "").trim(); });
+  S.A = (src.actividades || []).filter(a => a.clave && String(a.visible ?? "si").toLowerCase() !== "no")
+        .map(a => ({clave: String(a.clave).trim(), etiqueta: a.etiqueta || a.clave, descripcion: a.descripcion || "", orden: num(a.orden) ?? 99}))
+        .sort((a, b) => a.orden - b.orden);
+  S.X = {}; (src.contribuciones || []).forEach(c => { const a = num(c.alicuota); if (c.id && c.actividad && a != null) S.X[String(c.id).trim() + "|" + String(c.actividad).trim()] = {al: a, min: c.minimo, u: c.unidad_minimo || "", txt: String(c.concepto || "Contribución adicional")}; });
+  S.N = {}; (src.notas || []).forEach(n => { if (n.id && n.actividad && n.nota) (S.N[n.id + "|" + n.actividad] = String(n.nota)); });
+  S.L = (src.localidades || []).filter(r => r.id && r.localidad).map(mapRow);
+  const first = S.C.actividad_inicial; if (first && S.A.some(a => a.clave === first)) S.act = first; else if (S.A.length) S.act = S.A[0].clave;
+  S.ref = S.L.find(l => l.id === (S.C.localidad_referencia || "ROS")) || S.L[0];
+}
+
+/* ---------- Valores ---------- */
+const nominal = (l, a = S.act) => l.al[a];
+const extraOf = (l, a = S.act) => S.X[l.id + "|" + a] || null;
+const value = (l, a = S.act) => { const n = l.al[a]; if (n == null) return null; if (S.mode !== "ef") return n; const x = extraOf(l, a); return n * (1 + l.adic / 100) + (x ? x.al : 0); };
+const visible = l => (!S.prov || l.prov === S.prov) && (!S.reg || l.reg === S.reg);
+function classes(){
+  /* Escala fija y común a todas las actividades (editable en la pestaña config: cortes_leyenda = "5;6;6,5;7,5") */
+  const br = String(S.C.cortes_leyenda || "5;6;6,5;7,5").split(";").map(num).filter(v => v != null).sort((x, y) => x - y).slice(0, 4);
+  const level = v => { if (v == null) return 0; for (let i = 0; i < br.length; i++) if (v <= br[i] + 1e-9) return i + 1 + (4 - br.length); return 5; };
+  const ranges = br.map((b, i) => ({lab: i === 0 ? `hasta ${fmt(b, 1)}‰` : `${fmt(br[i - 1], 1)} – ${fmt(b, 1)}‰`, c: i + 1 + (4 - br.length)}));
+  ranges.push({lab: `más de ${fmt(br[br.length - 1], 1)}‰`, c: 5});
+  return {level, ranges};
+}
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const colorOf = lv => lv ? cssv("--c" + lv) : cssv("--nodata");
+function rankOf(l){
+  const arr = S.L.filter(x => visible(x) && value(x) != null).sort((a, b) => value(a) - value(b));
+  const v = value(l); if (v == null) return null;
+  return {pos: arr.findIndex(x => value(x) === v) + 1, of: arr.length};
+}
+const actLabel = (k = S.act) => (S.A.find(a => a.clave === k) || {etiqueta: k}).etiqueta;
+
+/* ---------- Encabezado ---------- */
+function renderHead(){
+  $("#tt-title").textContent = S.C.titulo || "Transparencia Tributaria";
+  $("#tt-lede").textContent = S.C.bajada || "";
+  const rel = S.L.filter(l => l.ok && !l.rev && visible(l)), sin = S.L.filter(l => !l.ok && !l.sr && visible(l));
+  const gen = rel.map(l => ({l, v: (l.al.general ?? null) == null ? null : l.al.general * (1 + l.adic / 100)})).filter(x => x.v != null);
+  const ind = rel.map(l => ({l, v: l.al.industria})).filter(x => x.v != null).sort((a, b) => a.v - b.v);
+  const mn = Math.min(...gen.map(x => x.v)), mx = Math.max(...gen.map(x => x.v));
+  const k = [
+    [String(rel.length), "localidades con ordenanza relevada"],
+    [gen.length ? `${fmt(mn, 1)}‰ – ${fmt(mx, 1)}‰` : "s/d", "rango de la alícuota general efectiva"],
+    [ind.length ? `${fmt(ind[0].v, 1)}‰` : "s/d", ind.length ? `menor alícuota industrial · ${ind[0].l.localidad}` : "alícuota industrial"],
+    [String(sin.length), "localidades sin ordenanza publicada"]
+  ];
+  $("#tt-kpis").innerHTML = k.map(([v, l]) => `<div class="kpi"><div class="v num">${esc(v)}</div><div class="l">${esc(l)}</div></div>`).join("");
+  $("#tt-metodo").textContent = S.C.nota_metodologica || "";
+  const links = [];
+  if (S.C.url_informe) links.push(`<a href="${esc(S.C.url_informe)}" target="_blank" rel="noopener">Leer el informe completo</a>`);
+  links.push(`<button type="button" class="linkbtn" data-open="coment">Reportar un error o sugerir</button>`, `<button type="button" class="linkbtn" data-open="loc">Sumar una localidad</button>`);
+  $("#tt-links").innerHTML = links.join(" · ");
+  $("#tt-corte").textContent = S.C.fecha_corte ? `Normativa vigente al ${S.C.fecha_corte}.` : "";
+  const st = $("#tt-status"); st.classList.toggle("live", S.live);
+  st.querySelector("span").textContent = S.live ? "Datos en línea desde la planilla de carga" : "Datos incluidos en la página";
+}
+
+/* ---------- Controles ---------- */
+function renderControls(){
+  $("#f-act").innerHTML = S.A.map(a => `<option value="${esc(a.clave)}">${esc(a.etiqueta)}</option>`).join("");
+  $("#f-act").value = S.act;
+  const provs = [...new Set(S.L.map(l => l.prov).filter(Boolean))].sort(), regs = [...new Set(S.L.map(l => l.reg).filter(Boolean))].sort();
+  $("#w-prov").hidden = provs.length < 2; $("#w-reg").hidden = regs.length < 2;
+  $("#f-prov").innerHTML = `<option value="">Todas</option>` + provs.map(p => `<option>${esc(p)}</option>`).join("");
+  $("#f-reg").innerHTML = `<option value="">Todas</option>` + regs.map(p => `<option>${esc(p)}</option>`).join("");
+  $("#dl-loc").innerHTML = S.L.map(l => `<option value="${esc(l.localidad)}">`).join("");
+  $("#b-csv").hidden = !TT_CONFIG.ENABLE_DOWNLOAD;
+}
+function actDesc(){
+  const a = S.A.find(x => x.clave === S.act);
+  $("#act-desc").textContent = (a && a.descripcion ? a.descripcion + ". " : "") + (S.mode === "ef" ? "Alícuota efectiva: incluye adicionales obligatorios sobre el DReI." : "Alícuota nominal: la que fija la ordenanza, sin adicionales.");
+}
+
+/* ---------- Mapa ---------- */
+let map, base, ring, ringLbl, dots = {}, polys = {}, hasPolys = false;
+function initMap(){
+  map = L.map("map", {zoomSnap: .25, scrollWheelZoom: false, attributionControl: true});
+  map.attributionControl.setPrefix(false);
+  setBase();
+  const pts = S.L.filter(l => l.lat != null).map(l => [l.lat, l.lon]);
+  if (pts.length) map.fitBounds(pts, {padding: [24, 24]}); else map.setView([-32.95, -60.7], 10);
+  map.on("click", () => {});
+}
+function isDark(){ return getComputedStyle(document.documentElement).colorScheme.includes("dark"); }
+const IGN = n => `https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/${n}@EPSG%3A3857@png/{z}/{x}/{y}.png`;
+const ESRI = n => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${n}/MapServer/tile/{z}/{y}/{x}`;
+const BASEMAPS = {
+  claro: {label: "Claro", url: d => ESRI(d ? "World_Dark_Gray_Base" : "World_Light_Gray_Base"), labels: d => ESRI(d ? "World_Dark_Gray_Reference" : "World_Light_Gray_Reference"), sub: "", attr: "Esri, HERE, Garmin, © OpenStreetMap"},
+  gris: {label: "Gris con calles (IGN)", url: d => IGN(d ? "argenmap_oscuro" : "mapabase_gris"), tms: true, sub: "", attr: "Argenmap · Instituto Geográfico Nacional", soft: true},
+  calles: {label: "Calles (Argenmap · IGN)", url: d => IGN(d ? "argenmap_oscuro" : "capabaseargenmap"), tms: true, sub: "", attr: "Argenmap · Instituto Geográfico Nacional", soft: true},
+  ninguno: {label: "Sin fondo", url: null}
+};
+let baseKey = null, tileErrors = 0, tileOk = 0, baseCtl = null;
+function setBase(key){
+  if (!TT_CONFIG.BASEMAP) return;
+  baseKey = key || baseKey || (BASEMAPS[TT_CONFIG.BASEMAP_STYLE] ? TT_CONFIG.BASEMAP_STYLE : "claro");
+  if (base) map.removeLayer(base); if (window._lbl) map.removeLayer(window._lbl); base = window._lbl = null;
+  const B = BASEMAPS[baseKey], d = isDark();
+  if (!map.getPane("labels")){ map.createPane("labels"); map.getPane("labels").style.zIndex = 450; map.getPane("labels").style.pointerEvents = "none"; }
+  if (B.url){
+    base = L.tileLayer(B.url(d), {subdomains: B.sub, tms: !!B.tms, maxZoom: 18, attribution: B.attr, className: B.soft ? "tiles-soft" : "tiles"})
+      .on("tileerror", () => { tileErrors++; if (tileErrors > 6 && !tileOk) noteBase(); })
+      .on("tileload", () => { tileOk++; }).addTo(map);
+    if (B.labels) window._lbl = L.tileLayer(B.labels(d), {subdomains: B.sub, maxZoom: 18, pane: "labels", opacity: .9}).addTo(map);
+  }
+  if (!baseCtl){
+    baseCtl = L.control({position: "topright"});
+    baseCtl.onAdd = () => {
+      const div = L.DomUtil.create("div", "basectl"); L.DomEvent.disableClickPropagation(div);
+      div.innerHTML = `<label for="f-base">Fondo</label><select id="f-base">${Object.entries(BASEMAPS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("")}</select>`;
+      div.querySelector("select").addEventListener("change", e => { tileErrors = tileOk = 0; setBase(e.target.value); paint(); });
+      return div;
+    };
+    baseCtl.addTo(map);
+  }
+  const sel = document.getElementById("f-base"); if (sel) sel.value = baseKey;
+}
+function noteBase(){
+  const n = $("#mapnote"); n.hidden = false;
+  n.textContent = "El fondo de calles no pudo cargarse en este entorno (por ejemplo, en una vista previa sin acceso a internet). En el sitio publicado se ve normalmente.";
+}
+function drawRing(){
+  if (ring) { map.removeLayer(ring); map.removeLayer(ringLbl); }
+  if (!S.ref || S.ref.lat == null || !TT_CONFIG.RADIO_KM) return;
+  ring = L.circle([S.ref.lat, S.ref.lon], {radius: TT_CONFIG.RADIO_KM * 1000, color: cssv("--gold"), weight: 1.2, dashArray: "4 6", fill: false, interactive: false}).addTo(map);
+  const p = L.latLng(S.ref.lat + TT_CONFIG.RADIO_KM / 111, S.ref.lon);
+  ringLbl = L.marker(p, {interactive: false, icon: L.divIcon({className: "ring-label", html: `${TT_CONFIG.RADIO_KM} km de ${esc(S.ref.localidad)}`, iconSize: null, iconAnchor: [60, -4]})}).addTo(map);
+}
+function tip(l){
+  const v = value(l);
+  return `<b>${esc(l.localidad)}</b>${l.rev ? " · <i>en revisión</i>" : ""}<br>${l.ok ? (v == null ? "Sin dato para " + esc(actLabel()) : esc(actLabel()) + ": <b>" + fmt(v) + "‰</b>") : (l.sr ? "Sin relevar todavía" : "Sin ordenanza publicada")}`;
+}
+function drawDots(){
+  Object.values(dots).forEach(d => map.removeLayer(d)); dots = {};
+  [...S.L].sort((a, b) => (b.sr ? 1 : 0) - (a.sr ? 1 : 0)).filter(l => l.lat != null && visible(l)).forEach(l => {
+    const d = L.circleMarker([l.lat, l.lon], {radius: l.sr ? 3 : (hasPolys ? 4 : 9), weight: 1.5, color: cssv("--panel"), fillOpacity: 1})
+      .bindTooltip("", {direction: "top", offset: [0, -6]}).on("click", e => { L.DomEvent.stopPropagation(e); select(l.id, false); }).addTo(map);
+    dots[l.id] = d;
+  });
+}
+function paint(){
+  const C = classes(), sel = cssv("--sel"), line = cssv("--panel");
+  S.L.forEach(l => {
+    const lv = l.ok ? C.level(value(l)) : 0, fill = colorOf(lv), on = S.sel === l.id, vis = visible(l);
+    const d = dots[l.id];
+    if (d && l.sr){ d.setStyle({fillColor: on ? sel : "transparent", color: on ? sel : cssv("--nodata-ink"), weight: on ? 3 : 1, radius: on ? 6 : 3, fillOpacity: on ? 1 : 0}); d.setTooltipContent(tip(l)); if (on) d.bringToFront(); }
+    else if (d){ d.setStyle({fillColor: hasPolys ? (on ? sel : cssv("--ink")) : fill, color: on ? sel : (l.rev ? cssv("--gold") : (hasPolys ? line : cssv("--c4"))), weight: on ? 3 : (l.rev ? 2.5 : (hasPolys ? 1.5 : 1)), radius: hasPolys ? (on ? 5 : 3.5) : (on ? 11 : 9)}); d.setTooltipContent(tip(l)); if (on) d.bringToFront(); }
+    const p = polys[l.id];
+    if (p){
+      if (!vis){ p.setStyle({opacity: 0, fillOpacity: 0}); return; }
+      const fo = BASEMAPS[baseKey] && BASEMAPS[baseKey].url ? (l.ok ? .55 : .3) : (l.ok ? .82 : .55);
+      p.setStyle({fillColor: fill, fillOpacity: fo, color: on ? sel : (l.rev ? cssv("--gold") : line), weight: on ? 3 : (l.rev ? 2 : 1), opacity: 1, dashArray: !l.ok ? "3 3" : (l.rev ? "6 4" : null)});
+      p.setTooltipContent(tip(l)); if (on) p.bringToFront();
+    }
+  });
+  S.L.forEach(l => { if (!l.sr && dots[l.id]) dots[l.id].bringToFront(); });
+  if (ring) ring.setStyle({color: cssv("--gold")});
+  legend(C);
+}
+function legend(C){
+  const rows = C.ranges.map(r => `<div class="row"><i style="background:${colorOf(r.c)}"></i><span class="num">${r.lab}</span></div>`).join("");
+  $("#legend").innerHTML = `<div class="t">${esc(actLabel())} · ${S.mode === "ef" ? "efectiva" : "nominal"}</div>${rows}<div class="row"><i style="background:${colorOf(0)}"></i><span>Sin ordenanza o sin dato</span></div>${S.L.some(l => l.sr) ? `<div class="row"><i style="background:transparent;border:1px solid var(--nodata-ink);border-radius:50%;width:9px;height:9px;margin:0 2px"></i><span>Sin relevar todavía</span></div>` : ""}${S.L.some(l => l.rev) ? `<div class="row"><i style="background:transparent;border:2px dashed var(--gold)"></i><span>Datos aportados, en revisión</span></div>` : ""}<div class="hint">Más claro = menor carga</div>`;
+}
+async function geocodeMissing(){
+  if (!TT_CONFIG.GEOREF) return;
+  const miss = S.L.filter(l => l.lat == null);
+  await Promise.all(miss.map(async l => {
+    const key = "tt-geo-" + norm(l.localidad) + "-" + norm(l.prov), c = store.get(key);
+    if (c){ l.lat = c[0]; l.lon = c[1]; return; }
+    for (const ep of ["municipios", "localidades"]){
+      try {
+        const u = `https://apis.datos.gob.ar/georef/api/${ep}?nombre=${encodeURIComponent(l.localidad)}${l.prov ? "&provincia=" + encodeURIComponent(l.prov) : ""}&max=1&campos=centroide`;
+        const j = await fetch(u).then(r => r.json()); const it = (j[ep] || [])[0];
+        if (it && it.centroide){ l.lat = it.centroide.lat; l.lon = it.centroide.lon; store.set(key, [l.lat, l.lon]); return; }
+      } catch(e){}
+    }
+  }));
+}
+async function loadPolygons(){
+  if (!TT_CONFIG.IGN_POLYGONS) return;
+  const note = $("#mapnote");
+  const base_ = S.L.filter(l => !l.sr), ids = base_.filter(l => l.ign).map(l => l.ign), names = base_.filter(l => !l.ign).map(l => l.localidad);
+  const key = "tt-ign-" + ids.join(",").length + "-" + ids.slice(0, 3).join("") + "-" + names.length;
+  let fc = store.get(key);
+  if (!fc){
+    note.hidden = false; note.textContent = "Cargando límites municipales…";
+    const q = [];
+    if (ids.length) q.push(`in1 IN (${ids.map(i => `'${i}'`).join(",")})`);
+    if (names.length) q.push(`nam IN (${names.map(n => `'${n.replace(/'/g, "''")}'`).join(",")})`);
+    const url = "https://wms.ign.gob.ar/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=application/json&typeName=ign:municipio&CQL_FILTER=" + encodeURIComponent(q.join(" OR "));
+    try {
+      const j = await fetch(url).then(r => r.json());
+      fc = {type: "FeatureCollection", features: j.features.map(f => ({type: "Feature", properties: {in1: f.properties.in1, nam: f.properties.nam}, geometry: f.geometry}))};
+      store.set(key, fc);
+    } catch(e){ note.textContent = "Límites municipales no disponibles: se muestran las cabeceras."; setTimeout(() => note.hidden = true, 6000); return; }
+    note.hidden = true;
+  }
+  base_.forEach(l => {
+    const f = fc.features.find(f => (l.ign && f.properties.in1 === l.ign) || (!l.ign && norm(f.properties.nam) === norm(l.localidad) && (!PROV[norm(l.prov)] || String(f.properties.in1).startsWith(PROV[norm(l.prov)]))));
+    if (!f || polys[l.id]) return;
+    polys[l.id] = L.geoJSON(f, {smoothFactor: 1.2}).bindTooltip("", {sticky: true}).on("click", e => { L.DomEvent.stopPropagation(e); select(l.id, false); }).addTo(map);
+  });
+  hasPolys = Object.keys(polys).length > 0;
+  if (hasPolys){ drawDots(); paint(); }
+}
+
+/* ---------- Ficha ---------- */
+function renderFicha(){
+  const box = $("#ficha"), l = S.L.find(x => x.id === S.sel);
+  if (!l){
+    const C = S.L.filter(x => visible(x) && value(x) != null).sort((a, b) => value(a) - value(b));
+    box.innerHTML = `<div class="eyebrow">Cómo usar el mapa</div><h2>Elegí una localidad</h2><p class="empty">Hacé clic en el mapa, en el ranking o buscala por nombre para ver su alícuota, mínimos, y regímenes especiales.</p>` +
+      (C.length ? `<div class="dl"><div><h3>Menor carga · ${esc(actLabel())}</h3><p>${esc(C[0].localidad)} (${fmt(value(C[0]))}‰)</p></div><div><h3>Mayor carga</h3><p>${esc(C[C.length - 1].localidad)} (${fmt(value(C[C.length - 1]))}‰)</p></div></div>` : "");
+    return;
+  }
+  const eb = [l.tipo, l.prov, l.km != null && l.id !== S.ref?.id ? `a ${fmt(l.km, 0)} km de ${S.ref.localidad}` : null].filter(Boolean).map(esc).join(" · ");
+  if (!l.ok){
+    box.innerHTML = `<div class="eyebrow">${eb}</div><h2>${esc(l.localidad)}</h2><span class="nodata-badge">${l.sr ? "Sin relevar todavía" : "Sin ordenanza publicada"}</span><div class="dl"><div><h3>Situación</h3><p>${l.sr ? "La Fundación todavía no relevó la ordenanza tributaria de esta localidad." : esc(l.normativa || "No se encontró la ordenanza tributaria vigente en fuentes públicas.")}</p></div>` +
+      `<div><h3>¿Tenés la ordenanza?</h3><p>Cargá la alícuota y el enlace a la norma: la localidad aparece en el mapa enseguida, en revisión.</p><p><button type="button" class="btn" data-open="loc" data-loc="${esc(l.id)}">Cargar los datos de ${esc(l.localidad)}</button></p></div></div>`;
+    return;
+  }
+  const v = value(l), n = nominal(l), rk = rankOf(l), ref = S.ref && S.ref.id !== l.id ? value(S.ref) : null;
+  let chips = "";
+  if (rk) chips += `<span class="chip">Puesto ${rk.pos} de ${rk.of} <span style="color:var(--muted)">(1 = menor carga)</span></span>`;
+  if (v != null && ref != null){ const d = v - ref; chips += Math.abs(d) < 0.005 ? `<span class="chip ref">Igual que ${esc(S.ref.localidad)}</span>` : `<span class="chip ${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${fmt(Math.abs(d))}‰ que ${esc(S.ref.localidad)}</span>`; }
+  if (S.ventas && v != null) chips += `<span class="chip ref">DReI estimado: ${money(S.ventas * v / 1000)} por mes</span>`;
+  const xo = extraOf(l);
+  const sub = v == null ? "" : [l.adic ? `Nominal ${fmt(n)}‰ + ${fmt(l.adic, 0)}% de adicionales obligatorios` : (xo ? `Nominal ${fmt(n)}‰` : "Sin adicionales obligatorios"), xo ? `+ ${fmt(xo.al, 1)}‰ ${xo.txt}${xo.min ? " (mínimo " + esc(String(xo.min).replace(".", ",")) + " " + esc(xo.u) + ")" : ""}` : ""].filter(Boolean).join(" ");
+  const nota = S.N[l.id + "|" + S.act];
+  const acts = S.A.map(a => { const x = value(l, a.clave); return `<tr data-a="${esc(a.clave)}" class="${a.clave === S.act ? "on" : ""}"><td>${esc(a.etiqueta)}${S.N[l.id + "|" + a.clave] ? "<sup>*</sup>" : ""}</td><td>${x == null ? "s/d" : fmt(x) + "‰"}</td></tr>`; }).join("");
+  const sec = (t, x) => x ? `<div><h3>${t}</h3><p>${x}</p></div>` : "";
+  box.innerHTML = `<div class="eyebrow">${eb}</div><h2>${esc(l.localidad)}</h2>${l.rev ? `<span class="rev-badge">Datos aportados · en revisión por la Fundación</span>` : ""}
+    <div class="big"><span class="v num">${v == null ? "s/d" : fmt(v)}</span><span class="u">${v == null ? "" : "‰ · "}${esc(actLabel())} · ${S.mode === "ef" ? "efectiva" : "nominal"}<br>${esc(sub)}</span></div>
+    <div class="chips">${chips}</div>${nota ? `<p class="note">${esc(nota)}</p>` : ""}
+    <table class="acts" aria-label="Alícuotas de ${esc(l.localidad)} por actividad"><tbody>${acts}</tbody></table>
+    <div class="dl">${sec("Adicionales", esc(l.adicional_detalle))}${sec("Mínimos mensuales", esc(l.minimos))}${sec("Regímenes especiales", esc(l.regimenes_especiales))}
+    ${sec("Normativa", esc(l.normativa))}${sec("Unidad de valor", esc(l.unidad_valor))}
+    ${l.fuente_url ? sec("Fuente", `<a href="${esc(l.fuente_url)}" target="_blank" rel="noopener">Ver la norma en el sitio oficial</a>${l.fecha_relevamiento ? (l.rev ? " · aportado " : " · relevado ") + esc(l.fecha_relevamiento) : ""}`) : ""}
+    <div><p><button type="button" class="linkbtn" data-open="coment" data-loc="${esc(l.id)}">Reportar un error en estos datos</button></p></div></div>`;
+  box.querySelectorAll(".acts tr").forEach(tr => tr.addEventListener("click", () => setAct(tr.dataset.a)));
+}
+
+/* ---------- Ranking y tabla ---------- */
+const isRef = l => (S.ref && l.id === S.ref.id) ? 1 : 0;
+function renderRank(){
+  const C = classes(), arr = S.L.filter(l => visible(l) && l.ok && value(l) != null).sort((a, b) => value(a) - value(b) || (isRef(b) - isRef(a)) || a.localidad.localeCompare(b.localidad));
+  const mx = Math.max(...arr.map(l => value(l)), 0.0001);
+  let pos = 0, prev = null;
+  $("#rank").innerHTML = arr.map((l, i) => {
+    const v = value(l); if (v !== prev) pos = i + 1; prev = v;
+    const shown = S.ventas ? money(S.ventas * v / 1000) : fmt(v) + "‰";
+    return `<div class="rrow ${S.sel === l.id ? "sel" : ""}" data-id="${esc(l.id)}" role="button" tabindex="0"><span class="p">${pos}</span><span class="n ${S.ref && l.id === S.ref.id ? "ref" : ""}">${esc(l.localidad)}${S.N[l.id + "|" + S.act] ? "<sup>*</sup>" : ""}${l.rev ? '<span class="rev">en revisión</span>' : ""}</span><span class="track"><div class="bar" style="width:${(v / mx * 100).toFixed(1)}%;background:${colorOf(C.level(v))}"></div></span><span class="v">${shown}</span></div>`;
+  }).join("") || `<p class="empty">Ninguna localidad tiene datos para esta actividad con los filtros elegidos.</p>`;
+  $("#rank").querySelectorAll(".rrow").forEach(r => { r.addEventListener("click", () => select(r.dataset.id, true)); r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); select(r.dataset.id, true); } }); });
+  const sd = S.L.filter(l => visible(l) && (!l.ok || value(l) == null));
+  const sinOrd = sd.filter(l => !l.ok && !l.sr).map(l => l.localidad), sinDato = sd.filter(l => l.ok).map(l => l.localidad), nSr = sd.filter(l => l.sr).length;
+  $("#rankfoot").innerHTML = (S.ventas ? `DReI mensual estimado con ventas de ${money(S.ventas)}, solo por alícuota: no incluye mínimos ni cuotas fijas. ` : "") +
+    (sinDato.length ? `Sin dato para esta actividad: ${esc(sinDato.join(", "))}. ` : "") + (sinOrd.length ? `Sin ordenanza publicada: ${esc(sinOrd.join(", "))}. ` : "") + (nSr ? `Además, ${nSr} municipios y comunas todavía sin relevar (círculos grises en el mapa).` : "");
+}
+function renderTable(){
+  const dk = isDark(), cols = S.A, CC = classes(), Cs = Object.fromEntries(cols.map(a => [a.clave, CC]));
+  let arr = S.L.filter(l => visible(l) && !l.sr);
+  const sk = S.sort || {k: S.act, dir: 1};
+  arr.sort((a, b) => {
+    if (sk.k === "_n") return sk.dir * a.localidad.localeCompare(b.localidad);
+    const x = value(a, sk.k), y = value(b, sk.k);
+    if (x == null && y == null) return a.localidad.localeCompare(b.localidad); if (x == null) return 1; if (y == null) return -1; return sk.dir * (x - y);
+  });
+  const th = `<thead><tr><th data-k="_n" class="${sk.k === "_n" ? "on" : ""}">Localidad</th>${cols.map(a => `<th data-k="${esc(a.clave)}" class="${a.clave === sk.k ? "on" : ""}">${esc(a.etiqueta)}${a.clave === sk.k ? (sk.dir > 0 ? " ↑" : " ↓") : ""}</th>`).join("")}</tr></thead>`;
+  const tb = arr.map(l => `<tr data-id="${esc(l.id)}" class="${S.sel === l.id ? "sel" : ""}"><td>${esc(l.localidad)}</td>${cols.map(a => { const v = value(l, a.clave), lv = Cs[a.clave].level(v), strong = lv >= 4; return `<td class="cell" style="background:${l.ok ? colorOf(lv) : "transparent"};color:${strong ? (dk ? "#0D1524" : "#FFFFFF") : "inherit"}">${l.ok ? (v == null ? "–" : fmt(v)) : "<span style='color:var(--muted)'>s/n</span>"}${S.N[l.id + "|" + a.clave] ? "<sup>*</sup>" : ""}</td>`; }).join("")}</tr>`).join("");
+  $("#mx").innerHTML = th + `<tbody>${tb}</tbody>`;
+  $("#mx").querySelectorAll("th").forEach(h => h.addEventListener("click", () => { const k = h.dataset.k; S.sort = {k, dir: S.sort && S.sort.k === k ? -S.sort.dir : 1}; renderTable(); }));
+  $("#mx").querySelectorAll("tbody tr").forEach(r => r.addEventListener("click", () => select(r.dataset.id, true)));
+}
+
+/* ---------- Acciones ---------- */
+function refresh(){ renderHead(); actDesc(); paint(); renderFicha(); renderRank(); renderTable(); }
+function setAct(k){ S.act = k; $("#f-act").value = k; S.sort = null; refresh(); }
+function select(id, pan){
+  S.sel = id; const l = S.L.find(x => x.id === id);
+  if (l && pan && map){ const p = polys[id]; if (p) map.fitBounds(p.getBounds(), {maxZoom: 11, padding: [40, 40]}); else if (l.lat != null) map.setView([l.lat, l.lon], Math.max(map.getZoom(), 10)); }
+  try { if (id) history.replaceState(null, "", "#" + id); } catch(e){}
+  paint(); renderFicha(); renderRank(); renderTable();
+  if (pan && window.innerWidth < 920) $("#ficha").scrollIntoView({behavior: "smooth", block: "start"});
+}
+function bind(){
+  $("#f-act").addEventListener("change", e => setAct(e.target.value));
+  const setMode = m => { S.mode = m; $("#m-ef").setAttribute("aria-pressed", m === "ef"); $("#m-no").setAttribute("aria-pressed", m === "no"); refresh(); };
+  $("#m-ef").addEventListener("click", () => setMode("ef")); $("#m-no").addEventListener("click", () => setMode("no"));
+  $("#f-prov").addEventListener("change", e => { S.prov = e.target.value; drawDots(); refresh(); });
+  $("#f-reg").addEventListener("change", e => { S.reg = e.target.value; drawDots(); refresh(); });
+  $("#f-buscar").addEventListener("change", e => { const q = norm(e.target.value); const l = S.L.find(x => norm(x.localidad) === q) || S.L.find(x => norm(x.localidad).includes(q)); if (q && l) select(l.id, true); });
+  $("#f-ventas").addEventListener("input", e => { const raw = e.target.value.replace(/\D/g, ""); S.ventas = raw ? +raw : null; e.target.value = raw ? (+raw).toLocaleString("es-AR") : ""; renderFicha(); renderRank(); });
+  const tabs = [["#t-rank", "#p-rank"], ["#t-tabla", "#p-tabla"]];
+  tabs.forEach(([t, p]) => $(t).addEventListener("click", () => { tabs.forEach(([t2, p2]) => { $(t2).setAttribute("aria-selected", t2 === t); $(p2).hidden = t2 !== t; }); }));
+  $("#b-csv").addEventListener("click", csv);
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  const re = () => { setBase(); paint(); renderRank(); renderTable(); };
+  mq.addEventListener && mq.addEventListener("change", re);
+  new MutationObserver(re).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+}
+function csv(){
+  const head = ["localidad", "provincia", "estado", "adicional_oblig_%", ...S.A.map(a => a.etiqueta + " (‰ nominal)")];
+  const rows = S.L.map(l => [l.localidad, l.prov, l.ok ? "relevada" : "sin normativa", l.adic, ...S.A.map(a => l.al[a.clave] == null ? "" : String(l.al[a.clave]).replace(".", ","))]);
+  const txt = [head, ...rows].map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + txt], {type: "text/csv;charset=utf-8"})); a.download = "transparencia-tributaria-drei.csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+/* ---------- Participación: formularios conectados a Google Apps Script ---------- */
+const PROVINCIAS = ["Buenos Aires","Catamarca","Chaco","Chubut","Ciudad Autónoma de Buenos Aires","Córdoba","Corrientes","Entre Ríos","Formosa","Jujuy","La Pampa","La Rioja","Mendoza","Misiones","Neuquén","Río Negro","Salta","San Juan","San Luis","Santa Cruz","Santa Fe","Santiago del Estero","Tierra del Fuego","Tucumán"];
+const ROLES = ["Vecino/a o contribuyente","Empresa o comercio","Contador/a o asesor/a","Cámara o entidad empresaria","Municipio o comuna","Concejal/a o equipo legislativo","Periodista o investigador/a","Otro"];
+const endpoint = () => [TT_CONFIG.APPS_SCRIPT_URL, S.C.apps_script_url].map(x => String(x || "").trim()).find(x => /^https:\/\/script\.google(usercontent)?\.com\//.test(x)) || "";
+let dlgMode = null, unidad = "mil", lastNew = null;
+
+function initForms(){
+  document.querySelectorAll("[data-roles]").forEach(s => s.innerHTML = `<option value="">Elegí una opción</option>` + ROLES.map(r => `<option>${esc(r)}</option>`).join(""));
+  document.querySelectorAll("[data-provs]").forEach(s => { s.innerHTML = PROVINCIAS.map(p => `<option>${esc(p)}</option>`).join(""); s.value = (S.ref && S.ref.prov) || "Santa Fe"; });
+  const y = new Date().getFullYear();
+  document.querySelectorAll("[data-periodos]").forEach(s => s.innerHTML = [y, y + 1].map(v => `<option>${v}</option>`).join(""));
+  $("#l-acts").innerHTML = S.A.filter(a => a.clave !== "general").map(a => `<div class="fld"><label for="la-${esc(a.clave)}">${esc(a.etiqueta)}</label><input id="la-${esc(a.clave)}" name="al_${esc(a.clave)}" inputmode="decimal" placeholder="= general"></div>`).join("");
+  fillLocSelect();
+  document.addEventListener("click", e => {
+    const o = e.target.closest("[data-open]"); if (o){ e.preventDefault(); openForm(o.dataset.open, o.dataset.loc || null); }
+    if (e.target.closest("[data-close]")) closeForm();
+  });
+  $("#dlg-x").addEventListener("click", closeForm);
+  $("#dlg").addEventListener("click", e => { if (e.target === $("#dlg")) closeForm(); });
+  $("#c-loc").addEventListener("change", e => { const otra = e.target.value === "__otra"; $("#c-otra-w").hidden = !otra; $("#c-prov-w").hidden = !otra; });
+  $("#f-loc").querySelectorAll("[data-u]").forEach(b => b.addEventListener("click", () => { unidad = b.dataset.u; $("#f-loc").querySelectorAll("[data-u]").forEach(x => x.setAttribute("aria-pressed", x === b)); }));
+  $("#l-prov").addEventListener("change", loadMunicipios);
+  $("#l-loc").addEventListener("input", checkExisting); $("#l-prov").addEventListener("change", checkExisting);
+  $("#f-coment").addEventListener("submit", e => { e.preventDefault(); send("comentario"); });
+  $("#f-loc").addEventListener("submit", e => { e.preventDefault(); send("localidad"); });
+  $("#done-ver").addEventListener("click", () => { closeForm(); if (lastNew) select(lastNew, true); $("#map").scrollIntoView({behavior: "smooth", block: "center"}); });
+}
+function fillLocSelect(){
+  const opts = [...S.L].sort((a, b) => a.localidad.localeCompare(b.localidad)).map(l => `<option value="${esc(l.id)}">${esc(l.localidad)}${l.prov && l.prov !== "Santa Fe" ? " (" + esc(l.prov) + ")" : ""}</option>`).join("");
+  $("#c-loc").innerHTML = `<option value="">Elegí la localidad</option>${opts}<option value="__otra">Otra localidad…</option>`;
+  $("#c-act").innerHTML = `<option value="">Todas o ninguna en particular</option>` + S.A.map(a => `<option value="${esc(a.clave)}">${esc(a.etiqueta)}</option>`).join("");
+}
+function openForm(kind, locId){
+  dlgMode = kind; const dlg = $("#dlg");
+  $("#f-coment").hidden = kind !== "coment"; $("#f-loc").hidden = kind !== "loc"; $("#f-done").hidden = true;
+  $("#dlg-t").textContent = kind === "coment" ? "Reportá un error o dejá una sugerencia" : "Sumá una localidad al mapa";
+  const f = kind === "coment" ? $("#f-coment") : $("#f-loc");
+  f.querySelector(".ferr").hidden = true; f.querySelectorAll("[aria-invalid]").forEach(x => x.removeAttribute("aria-invalid"));
+  const l = locId ? S.L.find(x => x.id === locId) : null;
+  if (kind === "coment"){ $("#c-loc").value = l ? l.id : (S.sel || ""); $("#c-act").value = S.act === "general" ? "" : S.act; $("#c-loc").dispatchEvent(new Event("change")); }
+  if (kind === "loc" && l){ $("#l-prov").value = l.prov || "Santa Fe"; $("#l-loc").value = l.localidad; checkExisting(); }
+  if (kind === "loc") loadMunicipios();
+  if (!endpoint()){ const er = f.querySelector(".ferr"); er.hidden = false; er.textContent = "El formulario todavía no está conectado a la planilla (falta la dirección del script). Podés completarlo, pero el envío no va a funcionar hasta que se active."; }
+  if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+  setTimeout(() => { const first = f.querySelector("input:not([type=hidden]):not([tabindex='-1'])"); if (first) first.focus(); }, 50);
+}
+function closeForm(){ const d = $("#dlg"); if (d.open){ if (d.close) d.close(); else d.removeAttribute("open"); } }
+async function loadMunicipios(){
+  const prov = $("#l-prov").value, key = "tt-munis-" + norm(prov), dl = $("#l-loc-dl");
+  let list = store.get(key);
+  if (!list){
+    try {
+      const j = await fetch(`https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&max=1000&campos=nombre&orden=nombre`).then(r => r.json());
+      list = (j.municipios || []).map(m => m.nombre); store.set(key, list);
+    } catch(e){ list = []; }
+  }
+  dl.innerHTML = list.map(n => `<option value="${esc(n)}">`).join("");
+}
+function checkExisting(){
+  const l = S.L.find(x => !x.sr && norm(x.localidad) === norm($("#l-loc").value) && norm(x.prov) === norm($("#l-prov").value)), a = $("#l-aviso");
+  if (!l){ a.hidden = true; return; }
+  a.hidden = false; a.className = "hint warn";
+  a.textContent = l.ok && !l.rev ? `${l.localidad} ya tiene datos relevados por la Fundación. Tu aporte queda registrado y lo usamos para revisar y actualizar la ficha.`
+    : l.rev ? `${l.localidad} ya tiene datos aportados en revisión. Tus datos los reemplazan y quedan también en revisión.`
+    : `${l.localidad} figura sin ordenanza publicada. Con tus datos pasa a mostrarse en el mapa, en revisión.`;
+}
+function validate(f){
+  let bad = null;
+  f.querySelectorAll("[required]").forEach(el => {
+    const empty = el.type === "checkbox" ? !el.checked : !String(el.value).trim();
+    const wrong = !empty && ((el.type === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value)) || (el.type === "url" && !/^https?:\/\/\S+\.\S+/.test(el.value)));
+    if (empty || wrong){ el.setAttribute("aria-invalid", "true"); bad = bad || el; } else el.removeAttribute("aria-invalid");
+  });
+  const url = f.querySelector("input[type=url]:not([required])"); if (url && url.value && !/^https?:\/\/\S+\.\S+/.test(url.value)){ url.setAttribute("aria-invalid", "true"); bad = bad || url; }
+  if (f.id === "f-loc"){
+    const g = num($("#l-gen").value); if (g == null){ $("#l-gen").setAttribute("aria-invalid", "true"); bad = bad || $("#l-gen"); }
+    else if ((unidad === "pct" ? g * 10 : g) > 100){ $("#l-gen").setAttribute("aria-invalid", "true"); return {el: $("#l-gen"), msg: "La alícuota general parece demasiado alta. Revisá si está en por mil (‰) o en por ciento (%)."}; }
+  }
+  if ($("#c-loc").value === "__otra" && f.id === "f-coment" && !$("#c-otra").value.trim()){ $("#c-otra").setAttribute("aria-invalid", "true"); bad = bad || $("#c-otra"); }
+  return bad ? {el: bad, msg: bad.type === "email" && bad.value ? "Revisá el correo electrónico." : bad.type === "url" && bad.value ? "El enlace tiene que empezar con http:// o https://." : bad.type === "checkbox" ? "Para enviar, marcá la casilla de aceptación." : "Completá los campos marcados."} : null;
+}
+function payload(kind){
+  const f = kind === "comentario" ? $("#f-coment") : $("#f-loc"), d = {tipo: kind, origen: location.href.split("#")[0]};
+  new FormData(f).forEach((v, k) => { if (k !== "acepto") d[k] = String(v).trim(); });
+  if (kind === "comentario"){
+    if (d.localidad_id === "__otra"){ d.localidad = d.localidad_otra; d.localidad_id = ""; }
+    else { const l = S.L.find(x => x.id === d.localidad_id); d.localidad = l ? l.localidad : ""; d.provincia = l ? l.prov : ""; if (l && l.sr) d.localidad_id = ""; }
+    delete d.localidad_otra;
+  } else {
+    const k = unidad === "pct" ? 10 : 1;
+    Object.keys(d).forEach(x => { if (x.startsWith("al_")){ const n = num(d[x]); d[x] = n == null ? "" : +(n * k).toFixed(4); } });
+    const ex = S.L.find(x => !x.sr && norm(x.localidad) === norm(d.localidad) && norm(x.prov) === norm(d.provincia)); if (ex) d.localidad_id = ex.id;
+    d.unidad_cargada = unidad === "pct" ? "%" : "‰";
+  }
+  return d;
+}
+async function post(d){
+  const url = endpoint(); if (!url) throw new Error("El formulario no está conectado a la planilla.");
+  try {
+    const r = await fetch(url, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify(d), redirect: "follow"});
+    return await r.json();
+  } catch(e){
+    await fetch(url, {method: "POST", mode: "no-cors", headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify(d)});
+    return {ok: true, sinConfirmacion: true, mensaje: "Enviamos tu aporte. No pudimos confirmar la recepción desde este navegador; si no aparece en unos minutos, escribinos."};
+  }
+}
+async function send(kind){
+  const f = kind === "comentario" ? $("#f-coment") : $("#f-loc"), er = f.querySelector(".ferr"), btn = f.querySelector("button[type=submit]");
+  const v = validate(f); if (v){ er.hidden = false; er.textContent = v.msg; v.el.focus(); return; }
+  er.hidden = true; btn.disabled = true; const txt = btn.textContent; btn.textContent = "Enviando…";
+  try {
+    const d = payload(kind), res = await post(d);
+    if (!res || !res.ok) throw new Error((res && res.error) || "No pudimos registrar el envío.");
+    lastNew = null;
+    if (kind === "localidad" && res.publicado !== false && !res.sinConfirmacion) lastNew = await addLocal(d, res);
+    f.reset(); unidad = "mil"; $("#f-loc").querySelectorAll("[data-u]").forEach(x => x.setAttribute("aria-pressed", x.dataset.u === "mil"));
+    f.hidden = true; $("#f-done").hidden = false; $("#done-t").textContent = "¡Gracias por tu aporte!";
+    $("#done-p").textContent = res.mensaje || "Recibimos tu aporte.";
+    $("#done-ver").hidden = !lastNew;
+  } catch(e){ er.hidden = false; er.textContent = e.message + " Revisá tu conexión e intentá de nuevo."; }
+  finally { btn.disabled = false; btn.textContent = txt; }
+}
+async function addLocal(d, res){
+  /* Alta inmediata en pantalla: la planilla ya la guardó; acá se muestra sin esperar la recarga. */
+  const id = res.localidad_id || ("NEW" + Date.now());
+  let l = S.L.find(x => x.id === id);
+  const row = {...(l || {}), id, localidad: d.localidad, provincia: d.provincia, estado: "aportada", lat: res.lat, lon: res.lon, ign_id: res.ign_id,
+    adicional_oblig: d.adicional_oblig || 0, adicional_detalle: d.adicional_detalle, minimos: d.minimos, regimenes_especiales: d.regimenes_especiales,
+    normativa: (d.ordenanza ? "Ordenanza " + d.ordenanza + ". " : "") + "Datos aportados; en revisión por la Fundación.", unidad_valor: d.unidad_valor, fuente_url: d.enlace,
+    tipo: d.tipo_gobierno, fecha_relevamiento: new Date().toISOString().slice(0, 10)};
+  S.A.forEach(a => { const v = d["al_" + a.clave]; row["al_" + a.clave] = v !== "" && v != null ? v : (a.clave !== "financieras" ? d.al_general : ""); });
+  const o = mapRow(row);
+  if (o.lat == null){ S.L.push(o); await geocodeMissing(); S.L.pop(); }
+  if (l) S.L[S.L.indexOf(l)] = o; else S.L.push(o);
+  S.L = S.L.filter(x => !(x.sr && norm(x.localidad) === norm(o.localidad) && norm(x.prov) === norm(o.prov)));
+  if (polys[id]){ map.removeLayer(polys[id]); delete polys[id]; }
+  fillLocSelect(); renderControls(); drawDots(); refresh(); loadPolygons();
+  return id;
+}
+
+/* ---------- Todas las localidades de una provincia (listado oficial Georef) ---------- */
+async function loadProvincias(){
+  const provs = String(S.C.provincias_completas || "").split(";").map(s => s.trim()).filter(Boolean);
+  const lista = provs.length ? provs : (TT_CONFIG.PROVINCIAS_COMPLETAS || []);
+  let added = 0;
+  for (const prov of lista){
+    const key = "tt-prov-" + norm(prov); let ms = store.get(key);
+    if (!ms){
+      try {
+        const j = await fetch(`https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&campos=id,nombre,categoria,centroide,provincia.nombre&max=1000`).then(r => r.json());
+        ms = (j.municipios || []).map(m => ({id: m.id, nombre: m.nombre, cat: m.categoria, lat: m.centroide.lat, lon: m.centroide.lon, prov: (m.provincia && m.provincia.nombre) || prov}));
+        store.set(key, ms);
+      } catch(e){ continue; }
+    }
+    const have = new Set(S.L.map(l => l.ign).filter(Boolean)), names = new Set(S.L.map(l => norm(l.localidad) + "|" + norm(l.prov)));
+    ms.forEach(m => {
+      if (have.has(String(m.id)) || names.has(norm(m.nombre) + "|" + norm(m.prov))) return;
+      let km = null;
+      if (S.ref && S.ref.lat != null){ const R = 6371, rad = x => x * Math.PI / 180, a = Math.sin(rad(m.lat - S.ref.lat) / 2) ** 2 + Math.cos(rad(S.ref.lat)) * Math.cos(rad(m.lat)) * Math.sin(rad(m.lon - S.ref.lon) / 2) ** 2; km = Math.round(2 * R * Math.asin(Math.sqrt(a))); }
+      S.L.push(mapRow({id: "G" + m.id, localidad: m.nombre, provincia: m.prov, tipo: m.cat || "", estado: "sin_relevar", ign_id: m.id, lat: m.lat, lon: m.lon, km_rosario: km}));
+      added++;
+    });
+  }
+  if (added){ renderControls(); fillLocSelect(); drawDots(); refresh(); provinceControl(); }
+}
+function provinceControl(){
+  if (window._provCtl) return;
+  window._provCtl = L.control({position: "topleft"});
+  window._provCtl.onAdd = () => {
+    const b = L.DomUtil.create("button", "provbtn"); b.type = "button"; b.textContent = "Ver toda la provincia"; L.DomEvent.disableClickPropagation(b);
+    let wide = false;
+    b.addEventListener("click", () => {
+      wide = !wide;
+      const pts = S.L.filter(l => l.lat != null && visible(l) && (wide || !l.sr)).map(l => [l.lat, l.lon]);
+      if (pts.length) map.fitBounds(pts, {padding: [20, 20]});
+      b.textContent = wide ? "Volver al área relevada" : "Ver toda la provincia";
+    });
+    return b;
+  };
+  window._provCtl.addTo(map);
+}
+
+/* ---------- Inicio ---------- */
+async function start(){
+  await loadData();
+  renderControls(); bind(); initForms();
+  await geocodeMissing();
+  initMap(); drawRing(); drawDots();
+  const h = (location.hash || "").slice(1); if (h && S.L.some(l => l.id === h)) S.sel = h;
+  refresh();
+  loadPolygons();
+  loadProvincias();
+}
+start();
+})();
+</script>
+
+</body>
+</html>
